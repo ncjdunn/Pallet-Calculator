@@ -112,7 +112,7 @@ if (manualPallet === "4x7") {
 
 
       
-const manualLength = document.getElementById('manualLength').value;
+const manualLength = document.getElementById('manualLength') ? document.getElementById('manualLength').value : "";
 if (manualLength) {
   palletList = [parseInt(manualLength)];
 }
