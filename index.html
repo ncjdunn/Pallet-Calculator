@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>John's Better Pallet Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f1f1;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .calculator-container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      padding: 20px;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-height: 60px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: block;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .results {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-container">
+    <img src="logo.png" class="logo" alt="Company Logo">
+    <h1>John's Better Pallet Calculator</h1>
+
+    <label for="length">Liner Length (ft):</label>
+    <input type="number" id="length">
+
+    <label for="diameter">Diameter (in):</label>
+    <input type="number" id="diameter">
+
+    <label for="gauge">Gauge (mm):</label>
+    <input type="number" id="gauge">
+
+    <label for="palletWidth">Pallet Width (ft):</label>
+    <select id="palletWidth">
+      <option value="7">7 ft</option>
+      <option value="8">8 ft</option>
+    </select>
+
+    <label for="direction">Stack Direction:</label>
+    <select id="direction">
+      <option value="longways">Longways</option>
+      <option value="sideways">Sideways</option>
+    </select>
+
+    <label for="manualStacks">Manual Stack Count (optional):</label>
+    <select id="manualStacks">
+      <option value="">Auto</option>
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+      <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+    </select>
+
+    <label for="manualPallet">Manual Pallet (optional):</label>
+    <select id="manualPallet">
+      <option value="">Auto</option>
+      <option value="4x4">4×4</option>
+      <option value="4x7">4×7</option>
+    </select>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    const palletLengths = [4, 7, 9, 12, 15, 20, 24, 30, 34, 35, 36, 40, 42, 43, 45, 48, 53, 58, 60, 65, 70, 72];
+
+    
+function calculate() {
+  const length = parseFloat(document.getElementById('length').value);
+  const diameter = parseFloat(document.getElementById('diameter').value);
+  const gauge = parseFloat(document.getElementById('gauge').value);
+  let palletWidth = parseInt(document.getElementById('palletWidth').value);
+  const direction = document.getElementById('direction').value;
+  const manualStacks = document.getElementById('manualStacks').value;
+  const manualPallet = document.getElementById('manualPallet').value;
+  const resultsDiv = document.getElementById('results');
+
+  if (!length || !diameter || !gauge) {
+    resultsDiv.innerHTML = '<p>Please fill in all fields.</p>';
+    return;
+  }
+
+  let perFoldHeight = diameter >= 24 ? gauge * 0.2644 : gauge * 0.3175;
+  if (diameter === 10 && gauge === 6) perFoldHeight = 1.905;
+  if (diameter >= 24 && gauge === 12) perFoldHeight = 3.173;
+
+  const stackWidth = (Math.PI * diameter) / 2;
+  let stackLimit = Math.floor((palletWidth * 12) / stackWidth);
+  if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
+
+  const palletLengths = [4, 7, 9, 12, 15, 20, 24, 30, 34, 35, 36, 40, 42, 43, 45, 48, 53, 58, 60, 65, 70, 72];
+  let palletList = palletLengths.slice();
+  if (manualPallet === "4x4") {
+    palletWidth = 4;
+    palletList = [4];
+  } else if (manualPallet === "4x7") {
+    palletWidth = 4;
+    palletList = [7];
+  }
+
+  const mStacks = manualStacks ? parseInt(manualStacks) : null;
+  if (mStacks && mStacks > stackLimit) {
+    resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
+    return;
+  }
+
+  for (let palletLength of palletList) {
+    const longEdge = direction === "longways" ? palletLength : palletWidth;
+    const stacks = mStacks || stackLimit;
+    const foldsPerStack = Math.floor((length / stacks) / (2 * longEdge));
+    const stackHeight = foldsPerStack * perFoldHeight;
+    const totalHeight = stackHeight + 10;
+
+    if (totalHeight <= 72) {
+      resultsDiv.innerHTML = `
+        <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
+        <p><strong>Stacks Across:</strong> ${stacks}</p>
+        <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
+        <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
+        <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
+      `;
+      return;
+    }
+  }
+
+  resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under 6 ft with these settings.</strong></p>';
+}
+
+      let perFoldHeight = diameter >= 24 ? gauge * 0.2644 : gauge * 0.3175;
+      if (diameter === 10 && gauge === 6) perFoldHeight = 1.905;
+      if (diameter >= 24 && gauge === 12) perFoldHeight = 3.173;
+
+      const stackWidth = (Math.PI * diameter) / 2;
+      let stackLimit = Math.floor((palletWidth * 12) / stackWidth);
+      if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
+
+      let palletList = palletLengths.slice();
+      if (manualPallet === "4x4") {
+        palletWidth = 4;
+        palletList = [4];
+      } else if (manualPallet === "4x7") {
+        palletWidth = 4;
+        palletList = [7];
+      }
+
+      const mStacks = manualStacks ? parseInt(manualStacks) : null;
+      if (mStacks && mStacks > stackLimit) {
+        resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
+        return;
+      }
+
+      for (let palletLength of palletList) {
+        const longEdge = direction === "longways" ? palletLength : palletWidth;
+        const stacks = mStacks || stackLimit;
+        const foldsPerStack = Math.floor((length / stacks) / (2 * longEdge));
+        const stackHeight = foldsPerStack * perFoldHeight;
+        const totalHeight = stackHeight + 10;
+
+        if (totalHeight <= 72) {
+          const usableHeight = 72 - 10;
+          const maxFoldsPerStack = Math.floor(usableHeight / perFoldHeight);
+          const actualMaxFootage = maxFoldsPerStack * stacks * (2 * longEdge);
+          const actualStackHeight = maxFoldsPerStack * perFoldHeight + 10;
+
+          resultsDiv.innerHTML = `
+            <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
+            <p><strong>Stacks Across:</strong> ${stacks}</p>
+            <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
+            <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
+            <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
+            
+          `;
+          return;
+        }
+        resultsDiv.innerHTML = `
+            <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
+            <p><strong>Stacks Across:</strong> ${stacks}</p>
+            <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
+            <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
+            <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
+            <p><strong>Max Footage on Pallet:</strong> ${Math.floor(maxFootage)} ft</p>
+            <p><strong>Full Height with Max Footage:</strong> ${fullStackHeight.toFixed(2)}"</p>
+          `;
+          return;
+        }
+      }
+
+      resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under 6 ft with these settings.</strong></p>';
+    }
+  </script>
+</body>
+</html>
