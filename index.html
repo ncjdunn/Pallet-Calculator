@@ -116,6 +116,11 @@ const manualLength = document.getElementById('manualLength') ? document.getEleme
 if (manualLength) {
   palletList = [parseInt(manualLength)];
 }
+
+const manualLength = document.getElementById('manualLength').value;
+if (manualLength) {
+  palletList = [ parseInt(manualLength) ];
+}
 const mStacks = manualStacks ? parseInt(manualStacks) : null;
       if (mStacks && mStacks > stackLimit) {
         resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
