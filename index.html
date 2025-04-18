@@ -22,7 +22,8 @@
   <label>Liner Length (ft): <input type="number" id="length"></label>
   <label>Diameter (in): <input type="number" id="diameter"></label>
   <label>Gauge (mm): <input type="number" id="gauge"></label>
-  <label>Pallet Width (ft): 
+<button onclick="calculate()">Calculate</button>
+<label>Pallet Width (ft): 
     <select id="palletWidth">
       <option value="7">7 ft</option>
       <option value="8">8 ft</option>
@@ -112,8 +113,7 @@
             <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
             <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
             <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
-            <p><strong>Max Footage on Pallet:</strong> ${Math.floor(maxFootage)} ft</p>
-            <p><strong>Full Height with Max Footage:</strong> ${fullStackHeight.toFixed(2)}"</p>
+            
           `;
           return;
         }
