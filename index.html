@@ -111,7 +111,12 @@ if (manualPallet === "4x7") {
 }
 
 
-      const mStacks = manualStacks ? parseInt(manualStacks) : null;
+      
+const manualLength = document.getElementById('manualLength').value;
+if (manualLength) {
+  palletList = [parseInt(manualLength)];
+}
+const mStacks = manualStacks ? parseInt(manualStacks) : null;
       if (mStacks && mStacks > stackLimit) {
         resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
         return;
