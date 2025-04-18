@@ -33,7 +33,6 @@ document.addEventListener('keydown', function(e) {
 <label>Pallet Width (ft): 
     <select id="palletWidth">
       <option value="7">7 ft</option>
-      <option value="4">4 ft</option>
       <option value="8">8 ft</option>
     </select>
   </label>
@@ -101,7 +100,10 @@ document.addEventListener('keydown', function(e) {
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
-       else 
+      if (manualPallet === "4x4") {
+        palletWidth = 4;
+        palletList = [4];
+      } else 
 if (manualPallet === "4x7") {
   palletWidth = 4;
   palletList = [7];
@@ -109,17 +111,7 @@ if (manualPallet === "4x7") {
 }
 
 
-      
-const manualLength = document.getElementById('manualLength').value;
-if (manualLength) {
-  palletList = [parseInt(manualLength)];
-}
-
-const manualLength = document.getElementById('manualLength').value;
-if (manualLength) {
-  palletList = [parseInt(manualLength)];
-}
-const mStacks = manualStacks ? parseInt(manualStacks) : null;
+      const mStacks = manualStacks ? parseInt(manualStacks) : null;
       if (mStacks && mStacks > stackLimit) {
         resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
         return;
