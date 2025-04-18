@@ -144,7 +144,7 @@ if ( === "4x7") {
         return;
       }
 
-      for (let palletLength of palletLengths) {
+      for (let palletLength of palletList) {
         const longEdge = direction === "longways" ? palletLength : palletWidth;
         const wideEdge = direction === "longways" ? palletWidth : palletLength;
         const stacks = mStacks || stackLimit;
