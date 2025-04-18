@@ -9,16 +9,11 @@ This repository contains the source files for John's Pallet Calculator web appli
 - **manifest.json**: Web App Manifest for PWA support.
 - **logo.png**: Company logo (place your logo file here).
 - **app-icon.png**: Application icon (place your icon file here).
+- **wood_grain_texture.jpg**: The bezel background texture (place your image here).
 
 ## Usage
 
-1. Clone or download the repository.
-2. Place `logo.png` and `app-icon.png` in the root directory.
-3. Serve the files with a static HTTP server (GitHub Pages, Netlify, etc.).
-4. The app supports installation as a PWA.
-
-## Deployment
-
-- You can host this on GitHub Pages by enabling GitHub Pages in the repository settings.
-- Ensure that `manifest.json`, `logo.png`, and `app-icon.png` are present.
+1. Place `logo.png`, `app-icon.png`, and `wood_grain_texture.jpg` in the root directory.
+2. Serve the files with a static HTTP server (e.g., GitHub Pages, Netlify).
+3. Press Enter or click "Calculate" to compute your pallet stack.
 
