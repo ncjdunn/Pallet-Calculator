@@ -78,13 +78,7 @@ document.addEventListener('keydown', function(e) {
       <option value="7">7</option><option value="8">8</option><option value="9">9</option>
     </select>
   </label>
-  <label>Manual Pallet (optional):
-    <select id="">
-      <option value="">Auto</option>
-      <option value="4x4">4×4</option>
-      <option value="4x7">4×7</option>
-    </select>
-  </label>
+  
 
   <div class="results" id="results"></div>
 
@@ -98,6 +92,7 @@ document.addEventListener('keydown', function(e) {
       let palletWidth = parseInt(document.getElementById('palletWidth').value);
       const direction = document.getElementById('direction').value;
       const manualStacks = document.getElementById('manualStacks').value;
+      const manualPallet = document.getElementById('manualPallet').value;
       const resultsDiv = document.getElementById('results');
 
       if (!length || !diameter || !gauge) {
@@ -127,11 +122,11 @@ document.addEventListener('keydown', function(e) {
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
-      if ( === "4x4") {
+      if (manualPallet === "4x4") {
         palletWidth = 4;
         palletList = [4];
       } else 
-if ( === "4x7") {
+if (manualPallet === "4x7") {
   palletWidth = 4;
   palletList = [7];
   direction = "longways";
