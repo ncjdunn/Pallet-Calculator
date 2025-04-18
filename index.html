@@ -5,7 +5,7 @@
   <title>John's Dark Pallet Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Dark theme */
+    /* Dark theme centered */
     body {
       margin: 0;
       height: 100vh;
@@ -38,12 +38,15 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
+      justify-items: center;
     }
     label {
       display: flex;
       flex-direction: column;
+      align-items: center;
       font-size: 14px;
       color: #cfcfcf;
+      width: 100%;
     }
     input,
     select {
@@ -54,6 +57,9 @@
       border-radius: 6px;
       background: #2c2c2c;
       color: #e0e0e0;
+      width: 80%;
+      max-width: 140px;
+      text-align: center;
     }
     button {
       margin-top: 20px;
@@ -79,7 +85,7 @@
       font-size: 16px;
       color: #e0e0e0;
       white-space: pre-wrap;
-      text-align: left;
+      text-align: center;
     }
     .note {
       color: #fbbd08;
@@ -172,6 +178,7 @@
       const manualStacks = document.getElementById('manualStacks').value;
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '';
+      // Lock width for 4×7 or 4×4
       if (manualLen==='7'||manualLen==='4') { width=4; direction=(manualLen==='7')?'longways':direction; }
       if (!length||!diameter||!gauge) { resultsDiv.textContent='Please fill in all fields.'; return; }
       const perFold=(diameter>=24?gauge*0.2644:gauge*0.3175)
@@ -186,12 +193,8 @@
         const totalHt=folds*perFold+10;
         const limit=((len===4||len===7)&&width===4)?43:73.2;
         if(stacks&&folds&&totalHt<=limit){
-          let out=`Pallet: ${len}×${width} ft
-Stacks: ${stacks}
-Folds/Stack: ${folds}
-Height: ${totalHt.toFixed(2)} in`;
-          if(limit===43) out+=`
-(Note: Height capped at 43 in)`;
+          let out=`Pallet: ${len}×${width} ft\nStacks: ${stacks}\nFolds/Stack: ${folds}\nHeight: ${totalHt.toFixed(2)} in`;
+          if(limit===43) out+=`\n(Note: Height capped at 43 in)`;
           resultsDiv.textContent=out; return;
         }
       }
