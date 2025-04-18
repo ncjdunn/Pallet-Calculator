@@ -103,10 +103,13 @@ document.addEventListener('keydown', function(e) {
       if (manualPallet === "4x4") {
         palletWidth = 4;
         palletList = [4];
-      } else if (manualPallet === "4x7") {
-        palletWidth = 4;
-        palletList = [7];
-      }
+      } else 
+if (manualPallet === "4x7") {
+  palletWidth = 4;
+  palletList = [7];
+  direction = "longways";
+}
+
 
       const mStacks = manualStacks ? parseInt(manualStacks) : null;
       if (mStacks && mStacks > stackLimit) {
