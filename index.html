@@ -100,10 +100,7 @@ document.addEventListener('keydown', function(e) {
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
-      if (manualPallet === "4x4") {
-        palletWidth = 4;
-        palletList = [4];
-      } else 
+       else 
 if (manualPallet === "4x7") {
   palletWidth = 4;
   palletList = [7];
