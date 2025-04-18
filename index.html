@@ -51,7 +51,7 @@ document.addEventListener('keydown', function(e) {
     </select>
   </label>
   <label>Manual Pallet (optional):
-    <select id="manualPallet">
+    <select id="">
       <option value="">Auto</option>
       <option value="4x4">4×4</option>
       <option value="4x7">4×7</option>
@@ -70,8 +70,7 @@ document.addEventListener('keydown', function(e) {
       let palletWidth = parseInt(document.getElementById('palletWidth').value);
       const direction = document.getElementById('direction').value;
       const manualStacks = document.getElementById('manualStacks').value;
-      const manualPallet = document.getElementById('manualPallet').value;
-      const resultsDiv = document.getElementById('results');
+            const resultsDiv = document.getElementById('results');
 
       if (!length || !diameter || !gauge) {
         resultsDiv.innerHTML = '<p>Please fill in all fields.</p>';
@@ -101,7 +100,7 @@ document.addEventListener('keydown', function(e) {
 
       let palletList = palletLengths.slice();
        else 
-if (manualPallet === "4x7") {
+if ( === "4x7") {
   palletWidth = 4;
   palletList = [7];
   direction = "longways";
