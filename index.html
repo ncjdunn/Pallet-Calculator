@@ -29,6 +29,34 @@ document.addEventListener('keydown', function(e) {
   <label>Liner Length (ft): <input type="number" id="length"></label>
   <label>Diameter (in): <input type="number" id="diameter"></label>
   <label>Gauge (mm): <input type="number" id="gauge"></label>
+
+<label>Manual Pallet Length (optional):</label>
+<select id="manualLength">
+  <option value="">Auto</option>
+  <option value="4">4 ft</option>
+  <option value="7">7 ft</option>
+  <option value="9">9 ft</option>
+  <option value="12">12 ft</option>
+  <option value="15">15 ft</option>
+  <option value="20">20 ft</option>
+  <option value="24">24 ft</option>
+  <option value="30">30 ft</option>
+  <option value="34">34 ft</option>
+  <option value="35">35 ft</option>
+  <option value="36">36 ft</option>
+  <option value="40">40 ft</option>
+  <option value="42">42 ft</option>
+  <option value="43">43 ft</option>
+  <option value="45">45 ft</option>
+  <option value="48">48 ft</option>
+  <option value="53">53 ft</option>
+  <option value="58">58 ft</option>
+  <option value="60">60 ft</option>
+  <option value="65">65 ft</option>
+  <option value="70">70 ft</option>
+  <option value="72">72 ft</option>
+</select>
+
 <button id="calculateBtn" onclick="calculate()">Calculate</button>
 <label>Pallet Width (ft): 
     <select id="palletWidth">
@@ -65,7 +93,7 @@ document.addEventListener('keydown', function(e) {
     // Manual Pallet Length override
     const manualLengthElem = document.getElementById("manualLength");
     const manualLength = manualLengthElem ? manualLengthElem.value : "";
-    let palletList = manualLength ? [parseInt(manualLength)] : palletLengths.slice();
+    const palletList = manualLength ? [parseInt(manualLength)] : palletLengths.slice();
 
     function calculate() {
       const length = parseFloat(document.getElementById('length').value);
