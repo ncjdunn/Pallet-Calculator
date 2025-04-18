@@ -34,13 +34,13 @@ document.addEventListener('keydown', function(e) {
     <select id="palletWidth">
       <option value="7">7 ft</option>
       <option value="8">8 ft</option>
-    </select>
+    </select></div>
   </label>
   <label>Stack Direction:
     <select id="direction">
       <option value="longways">Longways</option>
       <option value="sideways">Sideways</option>
-    </select>
+    </select></div>
   </label>
   <label>Manual Stack Count (optional):
     <select id="manualStacks">
@@ -48,14 +48,14 @@ document.addEventListener('keydown', function(e) {
       <option value="1">1</option><option value="2">2</option><option value="3">3</option>
       <option value="4">4</option><option value="5">5</option><option value="6">6</option>
       <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-    </select>
+    </select></div>
   </label>
   <label>Manual Pallet (optional):
-    <select id="">
+    <select id="manualPallet">
       <option value="">Auto</option>
       <option value="4x4">4×4</option>
       <option value="4x7">4×7</option>
-    </select>
+    </select></div>
   </label>
 
   <div class="results" id="results"></div>
@@ -70,7 +70,8 @@ document.addEventListener('keydown', function(e) {
       let palletWidth = parseInt(document.getElementById('palletWidth').value);
       const direction = document.getElementById('direction').value;
       const manualStacks = document.getElementById('manualStacks').value;
-            const resultsDiv = document.getElementById('results');
+      const manualPallet = document.getElementById('manualPallet').value;
+      const resultsDiv = document.getElementById('results');
 
       if (!length || !diameter || !gauge) {
         resultsDiv.innerHTML = '<p>Please fill in all fields.</p>';
@@ -99,11 +100,11 @@ document.addEventListener('keydown', function(e) {
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
-      if ( === "4x4") {
+      if (manualPallet === "4x4") {
         palletWidth = 4;
         palletList = [4];
       } else 
-if ( === "4x7") {
+if (manualPallet === "4x7") {
   palletWidth = 4;
   palletList = [7];
   direction = "longways";
