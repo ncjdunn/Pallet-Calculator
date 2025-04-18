@@ -130,7 +130,9 @@ document.addEventListener('keydown', function(e) {
             <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
             <p><strong>Stacks Across:</strong> ${stacks}</p>
             <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
-            <p><strong>Actual Stack Width Used:</strong> ${(stackWidth * stacks).toFixed(2)}"</p>
+            <p><strong>Individual Stack Width:</strong> ${stackWidth.toFixed(2)}""</p>
+<p><strong>Total Stack Width Used:</strong> ${(stackWidth * stacks).toFixed(2)}"</p>
+<p><strong>Unused Space on Pallet:</strong> ${(palletWidth * 12 - stackWidth * stacks).toFixed(2)}"</p>
 <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
             <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
             
