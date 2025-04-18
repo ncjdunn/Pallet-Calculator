@@ -126,21 +126,13 @@ const mStacks = manualStacks ? parseInt(manualStacks) : null;
         const stacks = mStacks || stackLimit;
         const foldsPerStack = Math.floor((length / stacks) / (2 * longEdge));
         const stackHeight = foldsPerStack * perFoldHeight;
-        
-const totalHeight = stackHeight + 10;
+        const totalHeight = stackHeight + 10;
 
-let heightLimit = (palletWidth === 4 && (palletList.length === 1 && (palletList[0] === 7 || palletList[0] === 4))) ? 43 : 73.2;
-
-
-
-        if (totalHeight <= heightLimit) {
+        if (totalHeight <= 73.2) {
           const maxFootage = foldsPerStack * stacks * (2 * longEdge);
           const fullStackHeight = (maxFootage / (2 * longEdge * stacks)) * perFoldHeight + 10;
 
-          if (heightLimit === 43) {
-  resultsDiv.innerHTML = "<p><strong>Note:</strong> Height limit of 43\" enforced for 4×4 or 4×7 pallet.</p>";
-}
-resultsDiv.innerHTML = `
+          resultsDiv.innerHTML = `
             <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
             <p><strong>Stacks Across:</strong> ${stacks}</p>
             <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
@@ -155,7 +147,7 @@ resultsDiv.innerHTML = `
         }
       }
 
-      resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under height limit with these settings.</strong></p>';
+      resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under 6.1 ft with these settings.</strong></p>';
     }
   
 document.addEventListener('keydown', function(e) {
