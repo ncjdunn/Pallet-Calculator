@@ -30,7 +30,7 @@ document.addEventListener('keydown', function(e) {
   <label>Diameter (in): <input type="number" id="diameter"></label>
   <label>Gauge (mm): <input type="number" id="gauge"></label>
 
-<label>Manual Pallet Length (optional):</label>
+<label for="manualLength">Manual Pallet Length (optional):</label>
 <select id="manualLength">
   <option value="">Auto</option>
   <option value="4">4 ft</option>
@@ -79,7 +79,7 @@ document.addEventListener('keydown', function(e) {
     </select>
   </label>
   <label>Manual Pallet (optional):
-    <select id="manualPallet">
+    <select id="">
       <option value="">Auto</option>
       <option value="4x4">4×4</option>
       <option value="4x7">4×7</option>
@@ -90,10 +90,6 @@ document.addEventListener('keydown', function(e) {
 
   <script>
     const palletLengths = [4, 7, 9, 12, 15, 20, 24, 30, 34, 35, 36, 40, 42, 43, 45, 48, 53, 58, 60, 65, 70, 72];
-    // Manual Pallet Length override
-    const manualLengthElem = document.getElementById("manualLength");
-    const manualLength = manualLengthElem ? manualLengthElem.value : "";
-    const palletList = manualLength ? [parseInt(manualLength)] : palletLengths.slice();
 
     function calculate() {
       const length = parseFloat(document.getElementById('length').value);
@@ -102,7 +98,6 @@ document.addEventListener('keydown', function(e) {
       let palletWidth = parseInt(document.getElementById('palletWidth').value);
       const direction = document.getElementById('direction').value;
       const manualStacks = document.getElementById('manualStacks').value;
-      const manualPallet = document.getElementById('manualPallet').value;
       const resultsDiv = document.getElementById('results');
 
       if (!length || !diameter || !gauge) {
@@ -132,11 +127,11 @@ document.addEventListener('keydown', function(e) {
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
-      if (manualPallet === "4x4") {
+      if ( === "4x4") {
         palletWidth = 4;
         palletList = [4];
       } else 
-if (manualPallet === "4x7") {
+if ( === "4x7") {
   palletWidth = 4;
   palletList = [7];
   direction = "longways";
@@ -149,7 +144,7 @@ if (manualPallet === "4x7") {
         return;
       }
 
-      for (let palletLength of palletList) {
+      for (let palletLength of palletLengths) {
         const longEdge = direction === "longways" ? palletLength : palletWidth;
         const wideEdge = direction === "longways" ? palletWidth : palletLength;
         const stacks = mStacks || stackLimit;
