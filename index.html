@@ -6,7 +6,14 @@
   <title>John's Better Pallet Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    calculate();
+  }
+});
+</script>
+
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #e0e0e0; color: #000; }
     label, select, input, button { display: block; width: 100%; margin-bottom: 15px; font-size: 16px; }
@@ -22,6 +29,7 @@
   <label>Liner Length (ft): <input type="number" id="length"></label>
   <label>Diameter (in): <input type="number" id="diameter"></label>
   <label>Gauge (mm): <input type="number" id="gauge"></label>
+<button id="calculateBtn" onclick="calculate()">Calculate</button>
 <label>Pallet Width (ft): 
     <select id="palletWidth">
       <option value="7">7 ft</option>
@@ -119,6 +127,13 @@
 
       resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under 6 ft with these settings.</strong></p>';
     }
-  </script>
+  
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    calculate();
+  }
+});
+</script>
+
 </body>
 </html>
