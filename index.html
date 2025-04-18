@@ -83,7 +83,20 @@ document.addEventListener('keydown', function(e) {
       if (diameter >= 24 && gauge === 12) perFoldHeight = 3.173;
 
       const stackWidth = (Math.PI * diameter) / 2;
+      
       let stackLimit = Math.floor((palletWidth * 12) / stackWidth);
+
+      // Apply real-world rules only for longways stacking on a 7ft wide pallet
+      if (palletWidth === 7 && direction === "longways") {
+        if (diameter >= 6 && diameter <= 6.5) stackLimit = 9;
+        else if (diameter === 7) stackLimit = 8;
+        else if (diameter > 7 && diameter <= 8) stackLimit = 7;
+        else if (diameter > 8 && diameter <= 9.5) stackLimit = 6;
+        else if (diameter >= 10 && diameter <= 11.5) stackLimit = 5;
+        else if (diameter >= 12 && diameter <= 15) stackLimit = 4;
+        else if (diameter >= 15.5 && diameter <= 20) stackLimit = 3;
+        else if (diameter >= 20.5 && diameter <= 30) stackLimit = 2;
+      }
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
