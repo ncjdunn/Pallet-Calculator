@@ -122,7 +122,7 @@ document.addEventListener('keydown', function(e) {
         const stackHeight = foldsPerStack * perFoldHeight;
         const totalHeight = stackHeight + 10;
 
-        if (totalHeight <= 72) {
+        if (totalHeight <= 73.2) {
           const maxFootage = foldsPerStack * stacks * (2 * longEdge);
           const fullStackHeight = (maxFootage / (2 * longEdge * stacks)) * perFoldHeight + 10;
 
@@ -130,7 +130,8 @@ document.addEventListener('keydown', function(e) {
             <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
             <p><strong>Stacks Across:</strong> ${stacks}</p>
             <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
-            <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
+            <p><strong>Actual Stack Width Used:</strong> ${(stackWidth * stacks).toFixed(2)}"</p>
+<p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
             <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
             
           `;
@@ -138,7 +139,7 @@ document.addEventListener('keydown', function(e) {
         }
       }
 
-      resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under 6 ft with these settings.</strong></p>';
+      resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under 6.1 ft with these settings.</strong></p>';
     }
   
 document.addEventListener('keydown', function(e) {
