@@ -51,7 +51,7 @@ document.addEventListener('keydown', function(e) {
     </select>
   </label>
   <label>Manual Pallet (optional):
-    <select id="">
+    <select id="manualPallet">
       <option value="">Auto</option>
       <option value="4x4">4×4</option>
       <option value="4x7">4×7</option>
@@ -63,80 +63,20 @@ document.addEventListener('keydown', function(e) {
   <script>
     const palletLengths = [4, 7, 9, 12, 15, 20, 24, 30, 34, 35, 36, 40, 42, 43, 45, 48, 53, 58, 60, 65, 70, 72];
 
-    
-function calculate() {
-  const length = parseFloat(document.getElementById('length').value);
-  const diameter = parseFloat(document.getElementById('diameter').value);
-  const gauge = parseFloat(document.getElementById('gauge').value);
-  const direction = document.getElementById('direction').value;
-  const palletWidth = parseInt(document.getElementById('palletWidth').value);
-  const manualStacks = document.getElementById('manualStacks').value;
-  const resultsDiv = document.getElementById('results');
+    function calculate() {
+      const length = parseFloat(document.getElementById('length').value);
+      const diameter = parseFloat(document.getElementById('diameter').value);
+      const gauge = parseFloat(document.getElementById('gauge').value);
+      let palletWidth = parseInt(document.getElementById('palletWidth').value);
+      const direction = document.getElementById('direction').value;
+      const manualStacks = document.getElementById('manualStacks').value;
+      const manualPallet = document.getElementById('manualPallet').value;
+      const resultsDiv = document.getElementById('results');
 
-  if (!length || !diameter || !gauge || !palletWidth || !direction) {
-    resultsDiv.innerHTML = '<p>Please fill in all fields.</p>';
-    return;
-  }
-
-  const perFoldHeight = (diameter === 10 && gauge === 6)
-    ? 1.905
-    : (diameter >= 24 && gauge === 12)
-      ? 3.173
-      : (diameter >= 24)
-        ? gauge * 0.2644
-        : gauge * 0.3175;
-
-  const stackWidth = (Math.PI * diameter) / 2;
-  const usableWidth = palletWidth === 4 ? 48 : palletWidth * 12;
-  let stackLimit = Math.floor(usableWidth / stackWidth);
-
-  // Real-world stack rules for 7 ft pallets, longways only
-  if (palletWidth === 7 && direction === "longways") {
-    if (diameter >= 6 && diameter <= 6.5) stackLimit = 9;
-    else if (diameter === 7) stackLimit = 8;
-    else if (diameter > 7 && diameter <= 8) stackLimit = 7;
-    else if (diameter > 8 && diameter <= 9.5) stackLimit = 6;
-    else if (diameter >= 10 && diameter <= 11.5) stackLimit = 5;
-    else if (diameter >= 12 && diameter <= 15) stackLimit = 4;
-    else if (diameter >= 15.5 && diameter <= 20) stackLimit = 3;
-    else if (diameter >= 20.5 && diameter <= 30) stackLimit = 2;
-  }
-
-  const stacks = manualStacks ? parseInt(manualStacks) : stackLimit;
-  if (stacks > stackLimit) {
-    resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
-    return;
-  }
-
-  const palletLengths = [4, 7, 9, 12, 15, 20, 24, 30, 34, 35, 36, 40, 42, 43, 45, 48, 53, 58, 60, 65, 70, 72];
-
-  for (let palletLength of palletLengths) {
-    const longEdge = direction === "longways" ? palletLength : palletWidth;
-    const foldsPerStack = Math.floor((length / stacks) / (2 * longEdge));
-    const stackHeight = foldsPerStack * perFoldHeight;
-    const totalHeight = stackHeight + 10;
-
-    let heightLimit = (palletWidth === 4 && (palletLength === 4 || palletLength === 7)) ? 43 : 73.2;
-    if (totalHeight <= heightLimit) {
-      let resultNote = (heightLimit === 43)
-        ? "<p><strong>Note:</strong> Height limit of 43&quot; enforced for 4×4 or 4×7 pallet.</p>"
-        : "";
-      resultsDiv.innerHTML = resultNote + `
-        <p><strong>Pallet Size:</strong> ${palletLength}×${palletWidth}</p>
-        <p><strong>Stacks Across:</strong> ${stacks}</p>
-        <p><strong>Folds per Stack:</strong> ${foldsPerStack}</p>
-        <p><strong>Individual Stack Width:</strong> ${stackWidth.toFixed(2)}"</p>
-        <p><strong>Total Stack Width Used:</strong> ${(stackWidth * stacks).toFixed(2)}"</p>
-        <p><strong>Unused Space on Pallet:</strong> ${(usableWidth - stackWidth * stacks).toFixed(2)}"</p>
-        <p><strong>Stack Height:</strong> ${stackHeight.toFixed(2)}"</p>
-        <p><strong>Total Height:</strong> ${totalHeight.toFixed(2)}"</p>
-      `;
-      return;
-    }
-  }
-
-  resultsDiv.innerHTML = '<p style="color:red;"><strong>No pallet fits under the height limit.</strong></p>';
-}
+      if (!length || !diameter || !gauge) {
+        resultsDiv.innerHTML = '<p>Please fill in all fields.</p>';
+        return;
+      }
 
       let perFoldHeight = diameter >= 24 ? gauge * 0.2644 : gauge * 0.3175;
       if (diameter === 10 && gauge === 6) perFoldHeight = 1.905;
@@ -160,8 +100,11 @@ function calculate() {
       if (diameter >= 26.74 && diameter <= 30 && palletWidth === 7) stackLimit = 2;
 
       let palletList = palletLengths.slice();
-       else 
-if ( === "4x7") {
+      if (manualPallet === "4x4") {
+        palletWidth = 4;
+        palletList = [4];
+      } else 
+if (manualPallet === "4x7") {
   palletWidth = 4;
   palletList = [7];
   direction = "longways";
