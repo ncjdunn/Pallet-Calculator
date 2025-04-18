@@ -62,6 +62,10 @@ document.addEventListener('keydown', function(e) {
 
   <script>
     const palletLengths = [4, 7, 9, 12, 15, 20, 24, 30, 34, 35, 36, 40, 42, 43, 45, 48, 53, 58, 60, 65, 70, 72];
+    // Manual Pallet Length override
+    const manualLengthElem = document.getElementById("manualLength");
+    const manualLength = manualLengthElem ? manualLengthElem.value : "";
+    let palletList = manualLength ? [parseInt(manualLength)] : palletLengths.slice();
 
     function calculate() {
       const length = parseFloat(document.getElementById('length').value);
@@ -111,17 +115,7 @@ if (manualPallet === "4x7") {
 }
 
 
-      
-const manualLength = document.getElementById('manualLength') ? document.getElementById('manualLength').value : "";
-if (manualLength) {
-  palletList = [parseInt(manualLength)];
-}
-
-const manualLength = document.getElementById('manualLength').value;
-if (manualLength) {
-  palletList = [ parseInt(manualLength) ];
-}
-const mStacks = manualStacks ? parseInt(manualStacks) : null;
+      const mStacks = manualStacks ? parseInt(manualStacks) : null;
       if (mStacks && mStacks > stackLimit) {
         resultsDiv.innerHTML = '<p style="color:red;"><strong>Too many stacks for pallet width.</strong></p>';
         return;
