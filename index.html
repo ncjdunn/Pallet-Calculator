@@ -82,7 +82,6 @@
             <option value="9">9</option>
           </select>
         </label>
-        <!-- Customer-specific conditional requirements -->
         <label>Customer
           <select id="customer">
             <option value="">None</option>
@@ -125,6 +124,11 @@
       const gauge = parseFloat(document.getElementById('gauge').value);
       const results = document.getElementById('results'); results.textContent = '';
       if (!length || !diameter || !gauge) { results.textContent = 'Please fill in all fields.'; return; }
+      // Always switch to auto stacks when diameter is not 31
+      if (diameter !== 31) {
+        ms.value = '';
+        userManual = false;
+      }
       // per-fold height (in)
       const perFold = (diameter>=24?gauge*0.2644:gauge*0.3175)
         +((diameter===10&&gauge===6)?1.905-gauge*0.3175:0)
@@ -143,31 +147,25 @@
         pw.value = String(width);
         ms.value = manualStacks;
       }
-      // initial stacks based on width
       const initStacks = manualStacks?parseInt(manualStacks,10):Math.floor((width*12)/stackW);
       const direction = dirSelect.value;
       const lengthsToTry = manualLen?[parseInt(manualLen,10)]:palletLengths.filter(l=>!(width===8&&l===4));
       for (let l of lengthsToTry) {
         let stacks = initStacks;
-        // if sideways & not manual, ignore width
-        if (!manualStacks && direction==='sideways') {
-          stacks = Math.floor((l*12)/stackW);
-        }
+        if (!manualStacks && direction==='sideways') { stacks = Math.floor((l*12)/stackW); }
         const folds = Math.floor((length/stacks)/(2*(direction==='longways'?l:width)));
         const totalIn = folds*perFold+10;
         const totalFt = (totalIn/12).toFixed(2);
         let out = `Pallet: ${l}×${width} ft
 Stacks: ${stacks}
 Folds/Stack: ${folds}
-Stack Width (1 stack): ${stackW.toFixed(2)} in
+` +
+                  `Stack Width (1 stack): ${stackW.toFixed(2)} in
 Height: ${totalFt} ft`;
-        if (userManual && !((width===4 && l===7) || (width===7 && l===4))) { results.textContent = out; return; }
+        if (userManual && !((width===4&&l===7)||(width===7&&l===4))) { results.textContent = out; return; }
         const cap = ((width===4&&(l===4||l===7))||(width===7&&l===4))?43:72.12;
-        if (totalIn<=cap) {
-          if (cap===43) out += `
-(Note: Height capped at 43 in)`;
-          results.textContent = out; return;
-        }
+        if (totalIn<=cap) { if (cap===43) out+=`
+(Note: Height capped at 43 in)`; results.textContent = out; return; }
       }
       results.textContent = 'No pallet fits under height limit.';
     }
