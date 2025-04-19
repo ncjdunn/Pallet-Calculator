@@ -4,90 +4,68 @@
   <meta charset="UTF-8">
   <title>John's Better Pallet Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- PWA manifest and icons -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="app-icon.png">
-  <meta name="theme-color" content="#1e1e1e">
   <style>
-    body { margin:0; height:100vh; background:#121212; color:#e0e0e0; display:flex; justify-content:center; align-items:center; font-family:'Segoe UI', Tahoma, sans-serif; }
-    /* Baby blue bezel */
-    .bezel { background-color:#6495ED; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); }
+    /* Dark theme with wood grain bezel */
+    body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#121212; color:#e0e0e0; font-family:'Segoe UI', Tahoma, sans-serif; }
+    .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); filter:brightness(1.3) contrast(1.1); }
     .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; width:360px; text-align:center; }
-    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; justify-items:center; align-items:center; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     label, input, select, button { width:100%; }
-    label { display:flex; flex-direction:column; align-items:center; font-size:14px; color:#ccc; }
-    input, select { margin-top:8px; padding:12px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; text-align:center; outline:none; }
+    label { display:flex; flex-direction:column; align-items:center; font-size:14px; color:#cfcfcf; }
+    input, select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; text-align:center; }
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
     .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:100px; font-size:16px; color:#e0e0e0; white-space:pre-wrap; text-align:left; }
-    @media (max-width: 600px) {
-      .bezel { padding: 0; border-radius: 0; width: 100vw; height: 100vh; box-shadow: none; }
-      .calculator { width: 100vw; height: 100vh; border-radius: 0; padding: 16px; box-shadow: none; }
-    }
   </style>
 </head>
 <body>
   <div class="bezel">
     <div class="calculator">
-      <img src="app-icon.png" alt="App Icon" style="max-height:60px;margin:0 auto 16px;display:block;">
+      <img src="logo.png" alt="Company Logo" style="max-height:60px;margin:0 auto 16px;display:block;">
       <h1 style="margin:0 0 20px;color:#fff;">John's Better Pallet Calculator</h1>
       <div class="grid">
-        <label>Liner Length (ft)
-          <input type="number" id="length" placeholder="e.g. 2500">
-        </label>
-        <label>Diameter (in)
-          <input type="number" id="diameter" placeholder="e.g. 10">
-        </label>
-        <label>Gauge (mm)
-          <input type="number" id="gauge" placeholder="e.g. 6">
-        </label>
-        <label>Manual Pallet Length
-          <select id="manualLength">
+        <label>Liner Length (ft)<input type="number" id="length"></label>
+        <label>Diameter (in)<input type="number" id="diameter"></label>
+        <label>Gauge (mm)<input type="number" id="gauge"></label>
+        <label>Manual Pallet Length<select id="manualLength">
             <option value="">Auto</option>
-            <option value="4">4 ft</option><option value="7">7 ft</option><option value="9">9 ft</option>
-            <option value="12">12 ft</option><option value="15">15 ft</option><option value="20">20 ft</option>
-            <option value="24">24 ft</option><option value="30">30 ft</option><option value="34">34 ft</option>
-            <option value="35">35 ft</option><option value="36">36 ft</option><option value="40">40 ft</option>
-            <option value="42">42 ft</option><option value="43">43 ft</option><option value="45">45 ft</option>
-            <option value="48">48 ft</option><option value="53">53 ft</option><option value="58">58 ft</option>
-            <option value="60">60 ft</option><option value="65">65 ft</option><option value="70">70 ft</option>
-            <option value="72">72 ft</option>
-          </select>
-        </label>
-        <label>Pallet Width (ft)
-          <select id="palletWidth">
-            <option value="4">4 ft</option><option value="7" selected>7 ft</option><option value="8">8 ft</option>
-          </select>
-        </label>
-        <label>Direction
-          <select id="direction">
-            <option value="longways">Longways</option><option value="sideways">Sideways</option>
-          </select>
-        </label>
-        <label>Manual Stacks
-          <select id="manualStacks">
+            <option>4</option><option>7</option><option>9</option><option>12</option><option>15</option>
+            <option>20</option><option>24</option><option>30</option><option>34</option><option>35</option>
+            <option>36</option><option>40</option><option>42</option><option>43</option><option>45</option>
+            <option>48</option><option>53</option><option>58</option><option>60</option><option>65</option>
+            <option>70</option><option>72</option>
+          </select></label>
+        <label>Pallet Width (ft)<select id="palletWidth">
+            <option value="4">4</option>
+            <option value="7" selected>7</option>
+            <option value="8">8</option>
+          </select></label>
+        <label>Direction<select id="direction">
+            <option value="longways">Longways</option>
+            <option value="sideways">Sideways</option>
+          </select></label>
+        <label>Manual Stacks<select id="manualStacks">
             <option value="">Auto</option>
-            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-          </select>
-        </label>
-        <label>Customer
-          <select id="customer">
-            <option value="">None</option><option value="corby">Corby Stock (7.5 ft Wide pallets)</option>
-            <option value="uwfl">UW FL 2000×7.75×6 on a 5×7</option><option value="gulf">Gulf Coast 4000×8×6 on a 9×7</option>
-            <option value="jetjack">Jet Jack Anything&lt;5000×7.95×6 on a 12×7</option><option value="leak">Leak Eliminators Stock on 9×7</option>
-            <option value="minchem">Min Chem (AE services max 7×7)</option><option value="municipal">Municipal Pipe Stock on 9×7</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option>
+          </select></label>
+        <label>Customer<select id="customer">
+            <option value="">None</option>
+            <option value="corby">Corby Stock (7.5 ft Wide pallets)</option>
+            <option value="uwfl">UW FL 2000×7.75×6 on a 5×7</option>
+            <option value="gulf">Gulf Coast 4000×8×6 on a 9×7</option>
+            <option value="jetjack">Jet Jack Anything&lt;5000×7.95×6 on a 12×7</option>
+            <option value="leak">Leak Eliminators Stock on 9×7</option>
+            <option value="minchem">Min Chem (AE services max 7×7)</option>
+            <option value="municipal">Municipal Pipe Stock on 9×7</option>
             <option value="suncoast">Suncoast 3000×8×6 on a 7×7</option>
-          </select>
-        </label>
+          </select></label>
       </div>
       <button id="calculateBtn">Calculate</button>
       <div class="results" id="results"></div>
     </div>
   </div>
   <script>
-    // Calculation logic remains unchanged
     document.addEventListener('DOMContentLoaded', () => {
       const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
       const lengthInput = document.getElementById('length');
@@ -99,9 +77,49 @@
       const dirSelect = document.getElementById('direction');
       const custSelect = document.getElementById('customer');
       const resultsDiv = document.getElementById('results');
-      function calculate() { /* existing logic */ }
       document.getElementById('calculateBtn').addEventListener('click', calculate);
       document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+      function calculate() {
+        pwSelect.value='7'; msSelect.value=''; resultsDiv.textContent='';
+        const length=parseFloat(lengthInput.value), diameter=parseFloat(diameterInput.value), gauge=parseFloat(gaugeInput.value);
+        const manualLen=mlSelect.value, direction=dirSelect.value, customer=custSelect.value;
+        if(!length||!diameter||!gauge){resultsDiv.textContent='Please fill in all fields.';return;}
+        let perFold=diameter>=24?gauge*0.2644:gauge*0.3175;
+        if(diameter===10&&gauge===6)perFold=1.905;
+        if(diameter>=24&&gauge===12)perFold=3.173;
+        const stackW=Math.PI*diameter/2;
+        let widthFt=parseInt(pwSelect.value,10);
+        if(!manualLen&&diameter>=30.5&&diameter<=31){
+          let h7=Math.floor((length/1)/(2*7))*perFold+10;
+          let stacks=h7>72.12?2:1;
+          pwSelect.value=h7>72.12?'8':'7'; msSelect.value=stacks;
+        }
+        const palletWidthIn=(customer==='corby')?90:parseInt(pwSelect.value)*12;
+        let stacks=msSelect.value?parseInt(msSelect.value):Math.floor(palletWidthIn/stackW);
+        if(widthFt===7){
+          if(diameter>=6&&diameter<7)stacks=9;
+          if(diameter===7)stacks=8;
+          if(diameter===8)stacks=7;
+          if(diameter>=9&&diameter<=9.5)stacks=6;
+          if(diameter>=11&&diameter<=11.5)stacks=5;
+          if(diameter>=13.5&&diameter<=15)stacks=4;
+          if(diameter>=17&&diameter<=20)stacks=3;
+          if(diameter>=20.5&&diameter<=30)stacks=2;
+        }
+        const lengthsToTry=manualLen?[parseInt(manualLen)]:palletLengths.filter(l=>!(parseInt(pwSelect.value)===8&&l===4));
+        for(let l of lengthsToTry){
+          let effStacks=stacks;
+          if(!msSelect.value&&direction==='sideways')effStacks=Math.floor((l*12)/stackW);
+          const folds=Math.floor((length/effStacks)/(2*(direction==='longways'?l:parseInt(pwSelect.value))));
+          const totalIn=folds*perFold+10;
+          const cap=((parseInt(pwSelect.value)===4&&(l===4||l===7))||(parseInt(pwSelect.value)===7&&l===4))?43:72.12;
+          if(effStacks>0&&totalIn<=cap){
+            resultsDiv.textContent=`Pallet: ${l}×${pwSelect.value} ft\nStacks: ${effStacks}\nFolds/Stack: ${folds}\nStack Width (1 stack): ${stackW.toFixed(2)} in\nHeight: ${(totalIn/12).toFixed(2)} ft` + (cap===43?`\n(Note: Height capped at 43 in)`:``);
+            return;
+          }
+        }
+        resultsDiv.textContent='No pallet fits under height limit.';
+      }
     });
   </script>
 </body>
