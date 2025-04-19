@@ -5,89 +5,171 @@
   <title>John's Better Pallet Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin:0; height:100vh; background:#121212; color:#e0e0e0; display:flex; justify-content:center; align-items:center; font-family:'Segoe UI', Tahoma, sans-serif; }
+    /* Dark theme with wood grain bezel */
+    body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#121212; color:#e0e0e0; font-family:'Segoe UI', Tahoma, sans-serif; }
     .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); filter:brightness(1.3) contrast(1.1); }
     .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; width:360px; text-align:center; }
-    .calculator img { margin:0 auto 16px; max-height:60px; display:block; }
-    .calculator h1 { margin:0 0 20px; font-size:24px; color:#fff; }
-    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; justify-items:center; }
-    label { display:flex; flex-direction:column; align-items:center; font-size:14px; color:#cfcfcf; width:100%; }
-    input,select { margin-top:6px; padding:10px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; width:80%; max-width:140px; text-align:center; }
-    button { margin-top:20px; width:100%; padding:14px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    label, input, select, button { width:100%; }
+    label { display:flex; flex-direction:column; align-items:center; font-size:14px; color:#cfcfcf; }
+    input, select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; text-align:center; }
+    button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
-    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:80px; font-size:16px; color:#e0e0e0; white-space:pre-wrap; text-align:center; }
+    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:100px; font-size:16px; color:#e0e0e0; white-space:pre-wrap; text-align:left; }
   </style>
 </head>
 <body>
   <div class="bezel">
     <div class="calculator">
-      <img src="logo.png" alt="Company Logo">
-      <h1>John's Better Pallet Calculator</h1>
+      <img src="logo.png" alt="Company Logo" style="max-height:60px;margin:0 auto 16px;display:block;">
+      <h1 style="margin:0 0 20px;color:#fff;">John's Better Pallet Calculator</h1>
       <div class="grid">
         <label>Liner Length (ft)<input type="number" id="length" placeholder="e.g. 2500"></label>
         <label>Diameter (in)<input type="number" id="diameter" placeholder="e.g. 10"></label>
         <label>Gauge (mm)<input type="number" id="gauge" placeholder="e.g. 6"></label>
-        <label>Manual Pallet Length<select id="manualLength">
-            <option value="">Auto</option><option value="4">4 ft</option><option value="7">7 ft</option><option value="9">9 ft</option><option value="12">12 ft</option>
-        </select></label>
-        <label>Pallet Width (ft)<select id="palletWidth">
-            <option value="4">4 ft</option><option value="7" selected>7 ft</option><option value="8">8 ft</option>
-        </select></label>
-        <label>Direction<select id="direction"><option value="longways">Longways</option><option value="sideways">Sideways</option></select></label>
-        <label>Manual Stacks<select id="manualStacks">
-            <option value="">Auto</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
-        </select></label>
+        <label>Manual Pallet Length
+          <select id="manualLength">
+            <option value="">Auto</option>
+            <!-- full list -->
+            <option value="4">4 ft</option>
+            <option value="7">7 ft</option>
+            <option value="9">9 ft</option>
+            <option value="12">12 ft</option>
+            <option value="15">15 ft</option>
+            <option value="20">20 ft</option>
+            <option value="24">24 ft</option>
+            <option value="30">30 ft</option>
+            <option value="34">34 ft</option>
+            <option value="35">35 ft</option>
+            <option value="36">36 ft</option>
+            <option value="40">40 ft</option>
+            <option value="42">42 ft</option>
+            <option value="43">43 ft</option>
+            <option value="45">45 ft</option>
+            <option value="48">48 ft</option>
+            <option value="53">53 ft</option>
+            <option value="58">58 ft</option>
+            <option value="60">60 ft</option>
+            <option value="65">65 ft</option>
+            <option value="70">70 ft</option>
+            <option value="72">72 ft</option>
+          </select>
+        </label>
+        <label>Pallet Width (ft)
+          <select id="palletWidth">
+            <option value="4">4 ft</option>
+            <option value="7" selected>7 ft</option>
+            <option value="8">8 ft</option>
+          </select>
+        </label>
+        <label>Direction
+          <select id="direction">
+            <option value="longways">Longways</option>
+            <option value="sideways">Sideways</option>
+          </select>
+        </label>
+        <label>Manual Stacks
+          <select id="manualStacks">
+            <option value="">Auto</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+          </select>
+        </label>
+        <!-- Customer-specific conditional requirements -->
+        <label>Customer
+          <select id="customer">
+            <option value="">None</option>
+            <option value="corby">Corby Stock (7.5 ft Wide pallets)</option>
+            <option value="uwfl">UW FL 2000×7.75×6 on a 5×7</option>
+            <option value="gulf">Gulf Coast 4000×8×6 on a 9×7</option>
+            <option value="jetjack">Jet Jack Anything&lt;5000×7.95×6 on a 12×7</option>
+            <option value="leak">Leak Eliminators Stock on 9×7</option>
+            <option value="minchem">Min Chem (AE services max 7×7)</option>
+            <option value="municipal">Municipal Pipe Stock on 9×7</option>
+            <option value="suncoast">Suncoast 3000×8×6 on a 7×7</option>
+          </select>
+        </label>
       </div>
       <button id="calculateBtn">Calculate</button>
       <div class="results" id="results"></div>
     </div>
   </div>
   <script>
-    document.getElementById('calculateBtn').addEventListener('click', calculate);
-    document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+    const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
+    const ml = document.getElementById('manualLength');
+    const pw = document.getElementById('palletWidth');
+    const ms = document.getElementById('manualStacks');
+    const dirSelect = document.getElementById('direction');
+    let userManual = false;
+
     document.addEventListener('DOMContentLoaded', () => {
-      const ml = document.getElementById('manualLength'), pw = document.getElementById('palletWidth');
-      ml.addEventListener('change', () => {
-        const o8 = pw.querySelector('option[value="8"]');
-        o8.disabled = ml.value === '4';
-        if (o8.disabled && pw.value==='8') pw.value='7';
-      });
+      ml.addEventListener('change', () => userManual = ml.value !== '');
+      ms.addEventListener('change', () => userManual = ms.value !== '');
+      document.getElementById('calculateBtn').addEventListener('click', calculate);
+      document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
     });
-    const lengths=[4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
-    function calculate(){
-      const l=+document.getElementById('length').value,
-            d=+document.getElementById('diameter').value,
-            g=+document.getElementById('gauge').value;
-      let w=+document.getElementById('palletWidth').value,
-          dir=document.getElementById('direction').value,
-          ml=document.getElementById('manualLength').value,
-          msel=document.getElementById('manualStacks').value,
-          res=document.getElementById('results');
-      res.textContent='';
-      if(!ml&&d===31){
-        const pf=(d>=24?g*0.2644:g*0.3175)+((d===10&&g===6)?1.905-g*0.3175:0)+((d>=24&&g===12)?3.173-g*0.2644:0);
-        if(pf*Math.floor(l/(14))+10>72){w=8;document.getElementById('palletWidth').value='8';document.getElementById('manualStacks').value='2';}
+
+    function calculate() {
+      // reset default selections
+      pw.value = '7';
+      userManual = ml.value !== '' || ms.value !== '';
+      const length = parseFloat(document.getElementById('length').value);
+      const diameter = parseFloat(document.getElementById('diameter').value);
+      const gauge = parseFloat(document.getElementById('gauge').value);
+      const results = document.getElementById('results'); results.textContent = '';
+      if (!length || !diameter || !gauge) { results.textContent = 'Please fill in all fields.'; return; }
+      // per-fold height (in)
+      const perFold = (diameter>=24?gauge*0.2644:gauge*0.3175)
+        +((diameter===10&&gauge===6)?1.905-gauge*0.3175:0)
+        +((diameter>=24&&gauge===12)?3.173-gauge*0.2644:0);
+      // stack width (in)
+      const stackW = Math.PI * diameter / 2;
+      let width = parseInt(pw.value,10);
+      let manualLen = ml.value;
+      let manualStacks = ms.value;
+      // 31" logic
+      if (!manualLen && diameter===31) {
+        const s7 = Math.floor((7*12)/stackW);
+        const f7 = Math.floor((length/s7)/(2*7));
+        const h7 = f7*perFold+10;
+        if (h7>72.12) { width=8; manualStacks='2'; } else { width=7; manualStacks=String(s7); }
+        pw.value = String(width);
+        ms.value = manualStacks;
       }
-      if(ml==='4'||ml==='7'){w=4;dir='longways';}
-      if(!l||!d||!g){res.textContent='Please fill in all fields.';return;}
-      const pf2=(d>=24?g*0.2644:g*0.3175)+((d===10&&g===6)?1.905-g*0.3175:0)+((d>=24&&g===12)?3.173-g*0.2644:0),
-            sw=Math.PI*d/2,
-            ms=msel?+msel:null;
-      let arr=ml?[+ml]:lengths;
-      if(w===8)arr=arr.filter(x=>x!==4);
-      let limit;
-      for(let x of arr){
-        const stk=ms||Math.floor(12*w/sw),
-              f=Math.floor((l/stk)/(2*(dir==='longways'?x:w))),
-              th=f*pf2+10;
-        limit=(w===4&&(x===4||x===7))?43:73.2;
-        if(stk&&f&&th<=limit){
-          let out=`Pallet: ${x}×${w} ft\nStacks: ${stk}\nFolds/Stack: ${f}\nHeight: ${th.toFixed(2)} in`;
-          if(limit===43)out+=`\n(Note: Height capped at 43 in)`;
-          res.textContent=out;return;
+      // initial stacks based on width
+      const initStacks = manualStacks?parseInt(manualStacks,10):Math.floor((width*12)/stackW);
+      const direction = dirSelect.value;
+      const lengthsToTry = manualLen?[parseInt(manualLen,10)]:palletLengths.filter(l=>!(width===8&&l===4));
+      for (let l of lengthsToTry) {
+        let stacks = initStacks;
+        // if sideways & not manual, ignore width
+        if (!manualStacks && direction==='sideways') {
+          stacks = Math.floor((l*12)/stackW);
+        }
+        const folds = Math.floor((length/stacks)/(2*(direction==='longways'?l:width)));
+        const totalIn = folds*perFold+10;
+        const totalFt = (totalIn/12).toFixed(2);
+        let out = `Pallet: ${l}×${width} ft
+Stacks: ${stacks}
+Folds/Stack: ${folds}
+Stack Width (1 stack): ${stackW.toFixed(2)} in
+Height: ${totalFt} ft`;
+        if (userManual && !((width===4 && l===7) || (width===7 && l===4))) { results.textContent = out; return; }
+        const cap = ((width===4&&(l===4||l===7))||(width===7&&l===4))?43:72.12;
+        if (totalIn<=cap) {
+          if (cap===43) out += `
+(Note: Height capped at 43 in)`;
+          results.textContent = out; return;
         }
       }
-      res.textContent=`No pallet fits under ${limit===43?'43':'73.2'} in`;
+      results.textContent = 'No pallet fits under height limit.';
     }
   </script>
 </body>
