@@ -20,6 +20,10 @@
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
     .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:100px; font-size:16px; color:#e0e0e0; white-space:pre-wrap; text-align:left; }
+    @media (max-width: 600px) {
+      .bezel { padding: 0; border-radius: 0; width: 100vw; height: 100vh; box-shadow: none; }
+      .calculator { width: 100vw; height: 100vh; border-radius: 0; padding: 16px; box-shadow: none; }
+    }
   </style>
 </head>
 <body>
@@ -85,7 +89,19 @@
   <script>
     // Calculation logic remains unchanged
     document.addEventListener('DOMContentLoaded', () => {
-      // ... existing JS ...
+      const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
+      const lengthInput = document.getElementById('length');
+      const diameterInput = document.getElementById('diameter');
+      const gaugeInput = document.getElementById('gauge');
+      const mlSelect = document.getElementById('manualLength');
+      const pwSelect = document.getElementById('palletWidth');
+      const msSelect = document.getElementById('manualStacks');
+      const dirSelect = document.getElementById('direction');
+      const custSelect = document.getElementById('customer');
+      const resultsDiv = document.getElementById('results');
+      function calculate() { /* existing logic */ }
+      document.getElementById('calculateBtn').addEventListener('click', calculate);
+      document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
     });
   </script>
 </body>
