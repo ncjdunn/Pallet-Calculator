@@ -4,25 +4,39 @@
   <meta charset="UTF-8">
   <title>Report an Error</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="app-icon.png">
+  <meta name="theme-color" content="#1e1e1e">
   <style>
-    /* styles */
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background:#121212; color:#e0e0e0; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); }
+    .container { background:#1e1e1e; padding:24px; border-radius:8px; width:90%; max-width:400px; }
+    h1 { margin-top:0; }
+    label { display:block; margin-bottom:12px; font-size:14px; }
+    textarea { width:100%; padding:8px; border-radius:4px; border:1px solid #444; background:#2c2c2c; color:#e0e0e0; font-size:14px; resize:vertical; height:150px; }
+    button { margin-top:16px; width:100%; padding:12px; font-size:16px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; }
+    button:hover { background:#9a65d1; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Report an Error</h1>
-    <form id="errorForm">
-      <label>Error Details:
-        <textarea id="reportDetails" placeholder="Describe what went wrong and what are the results that should have been displayed." required></textarea>
-      </label>
-      <button type="submit">Send Report</button>
-    </form>
+  <div class="bezel">
+    <div class="container">
+      <h1>Report an Error</h1>
+      <form id="errorForm">
+        <label>Error Details:
+          <textarea id="reportDetails" placeholder="Describe what went wrong and what are the results that should have been displayed." required></textarea>
+        </label>
+        <button type="submit">Send Report</button>
+      </form>
+    </div>
   </div>
   <script>
     document.getElementById('errorForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const details = document.getElementById('reportDetails').value;
-      window.location.href = `mailto:support@example.com?subject=${encodeURIComponent('Error Report')}&body=${encodeURIComponent(details)}`;
+      const subject = encodeURIComponent('Error Report');
+      const body = encodeURIComponent(details);
+      window.location.href = `mailto:support@example.com?subject=${subject}&body=${body}`;
     });
   </script>
 </body>
