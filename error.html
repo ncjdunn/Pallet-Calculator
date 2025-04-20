@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report an Error</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* styles */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Report an Error</h1>
+    <form id="errorForm">
+      <label>Error Details:
+        <textarea id="reportDetails" placeholder="Describe what went wrong and what are the results that should have been displayed." required></textarea>
+      </label>
+      <button type="submit">Send Report</button>
+    </form>
+  </div>
+  <script>
+    document.getElementById('errorForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const details = document.getElementById('reportDetails').value;
+      window.location.href = `mailto:support@example.com?subject=${encodeURIComponent('Error Report')}&body=${encodeURIComponent(details)}`;
+    });
+  </script>
+</body>
+</html>
