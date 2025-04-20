@@ -18,7 +18,7 @@
     input, select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; text-align:center; }
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
-    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:100px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
+    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:120px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
   </style>
 </head>
 <body>
@@ -42,7 +42,8 @@
         </select></label>
         <label>Pallet Width<select id="palletWidth">
             <option value="4">4</option>
-            <option value="7" selected>7</option>
+            <option value="7">7</option>
+            <option value="7.5">7.5</option>
             <option value="8">8</option>
         </select></label>
         <label>Direction<select id="direction">
@@ -78,85 +79,123 @@
       el.addEventListener('input', calculate);
       el.addEventListener('change', calculate);
     });
+    const diameterEl = document.getElementById('diameter');
+    const widthEl = document.getElementById('palletWidth');
+    diameterEl.addEventListener('input', () => {
+      const val = parseFloat(diameterEl.value);
+      widthEl.value = (!isNaN(val) && Math.abs(val - 31) < 0.001) ? '8' : '7';
+      calculate();
+    });
+    diameterEl.addEventListener('change', () => diameterEl.dispatchEvent(new Event('input')));
+    document.getElementById('calculateBtn').addEventListener('click', calculate);
     calculate();
+
     function calculate() {
       const length = parseFloat(document.getElementById('length').value);
-      const diameter = parseFloat(document.getElementById('diameter').value);
+      const diameter = parseFloat(diameterEl.value);
       const gauge = parseFloat(document.getElementById('gauge').value);
       const manualLen = document.getElementById('manualLength').value;
-      let widthFt = parseInt(document.getElementById('palletWidth').value, 10);
+      const widthFt = parseFloat(widthEl.value);
       const direction = document.getElementById('direction').value;
       const manualStacks = document.getElementById('manualStacks').value;
-      const custSelect = document.getElementById('customer').value;
       const results = document.getElementById('results');
-      if (!length || !diameter || !gauge) { results.textContent = 'Please fill in all fields.'; return; }
+      if (!length || !diameter || !gauge) {
+        results.textContent = 'Please fill in all fields.';
+        return;
+      }
       let perFold = diameter >= 24 ? gauge * 0.2644 : gauge * 0.3175;
       if (diameter === 10 && gauge === 6) perFold = 1.905;
       if (diameter >= 24 && gauge === 12) perFold = 3.173;
       const stackW = Math.PI * diameter / 2;
       const capHeight = 72.12;
-      // Manual mode
+      const emptyHeightIn = 10;
+      // Format total height inches into ft and inches
+      function formatHeight(totalIn) {
+        const ft = Math.floor(totalIn/12);
+        const inches = ((totalIn - ft*12)).toFixed(1);
+        return `${ft} ft ${inches} in`;
+      }
+      function formatResult(lines) {
+        return lines.join('\n') + `\nEmpty Pallet Height: ${emptyHeightIn} in`;
+      }
       if (manualLen) {
         const l = parseInt(manualLen, 10);
-        const footprintIn = direction === 'longways' ? widthFt * 12 : l * 12;
+        const footprintIn = (direction === 'longways' ? widthFt * 12 : l * 12);
         const stacks = manualStacks ? parseInt(manualStacks, 10) : Math.floor(footprintIn / stackW);
         if (stacks <= 0) { results.textContent = 'No stacks fit.'; return; }
         const folds = Math.floor((length / stacks) / (2 * (direction === 'longways' ? l : widthFt)));
-        const totalIn = folds * perFold + 10;
-        const freeWidth = Math.abs(footprintIn - (stacks * stackW));
-        results.textContent =
-          `Pallet: ${l}×${widthFt} ft\nStacks: ${stacks}\nStack Width: ${stackW.toFixed(2)} in\nFolds: ${folds}\nHeight: ${(totalIn/12).toFixed(2)} ft\nFree Width: ${freeWidth.toFixed(2)} in`;
+        const totalIn = folds * perFold + emptyHeightIn;
+        const freePalletWidth = Math.abs(footprintIn - stacks * stackW);
+        results.textContent = formatResult([
+          `Pallet: ${l}×${widthFt} ft`,
+          `Stacks: ${stacks}`,
+          `Stack Width: ${stackW.toFixed(2)} in`,
+          `Folds: ${folds}`,
+          `Total Height (including pallet): ${formatHeight(totalIn)}`,
+          `Free Pallet Width: ${freePalletWidth.toFixed(2)} in`
+        ]);
         return;
       }
-      // 8-ft-wide auto
       if (widthFt === 8 && !manualStacks) {
         for (let l of palletLengths.filter(x => x !== 4)) {
           const stacks = 2;
           const folds = Math.floor((length / stacks) / (2 * (direction === 'longways' ? l : 8)));
-          const totalIn = folds * perFold + 10;
+          const totalIn = folds * perFold + emptyHeightIn;
           if (totalIn <= capHeight) {
-            const freeWidth = Math.abs((8 * 12) - (stacks * stackW));
-            results.textContent =
-              `Pallet: ${l}×8 ft\nStacks: ${stacks}\nStack Width: ${stackW.toFixed(2)} in\nFolds: ${folds}\nHeight: ${(totalIn/12).toFixed(2)} ft\nFree Width: ${freeWidth.toFixed(2)} in`;
+            const freePalletWidth = Math.abs(8 * 12 - stacks * stackW);
+            results.textContent = formatResult([
+              `Pallet: ${l}×8 ft`,
+              `Stacks: ${stacks}`,
+              `Stack Width: ${stackW.toFixed(2)} in`,
+              `Folds: ${folds}`,
+              `Total Height (including pallet): ${formatHeight(totalIn)}`,
+              `Free Pallet Width: ${freePalletWidth.toFixed(2)} in`
+            ]);
             return;
           }
         }
       }
-      // 31" special
       if (!manualLen && !manualStacks && Math.abs(diameter - 31) < 0.001) {
-        const stacks7 = 1;
-        const folds7 = Math.floor((length / stacks7) / (2 * 7));
-        const totalIn7 = folds7 * perFold + 10;
-        if (totalIn7 <= capHeight) {
-          const freeWidth = Math.abs((7 * 12) - (stacks7 * stackW));
-          results.textContent =
-            `Pallet: 7×7 ft\nStacks: ${stacks7}\nStack Width: ${stackW.toFixed(2)} in\nFolds: ${folds7}\nHeight: ${(totalIn7/12).toFixed(2)} ft\nFree Width: ${freeWidth.toFixed(2)} in`;
-          return;
-        }
-        for (let l of palletLengths.filter(x => x >= 7)) {
-          const stacks = 2;
-          const folds = Math.floor((length / stacks) / (2 * 8));
-          const totalIn = folds * perFold + 10;
+        const specialLengths = [7,9,12,15,20];
+        for (let i = 0; i < specialLengths.length; i++) {
+          const l = specialLengths[i];
+          const stacks = (i === 0 ? 1 : 2);
+          const w = (i === 0 ? 7 : 8);
+          const folds = Math.floor((length / stacks) / (2 * w));
+          const totalIn = folds * perFold + emptyHeightIn;
           if (totalIn <= capHeight) {
-            const freeWidth = Math.abs((8 * 12) - (stacks * stackW));
-            results.textContent =
-              `Pallet: ${l}×8 ft\nStacks: ${stacks}\nStack Width: ${stackW.toFixed(2)} in\nFolds: ${folds}\nHeight: ${(totalIn/12).toFixed(2)} ft\nFree Width: ${freeWidth.toFixed(2)} in`;
+            const freePalletWidth = Math.abs(w * 12 - stacks * stackW);
+            results.textContent = formatResult([
+              `Pallet: ${l}×${w} ft`,
+              `Stacks: ${stacks}`,
+              `Stack Width: ${stackW.toFixed(2)} in`,
+              `Folds: ${folds}`,
+              `Total Height (including pallet): ${formatHeight(totalIn)}`,
+              `Free Pallet Width: ${freePalletWidth.toFixed(2)} in`
+            ]);
             return;
           }
         }
+        results.textContent = 'No 31" pallet fits within height on 8-ft 2-stack.';
+        return;
       }
-      // Default auto (7-ft)
       for (let l of palletLengths.filter(x => !(widthFt === 8 && x === 4))) {
-        const footprintIn = direction === 'longways' ? widthFt * 12 : l * 12;
+        const footprintIn = (direction === 'longways' ? widthFt * 12 : l * 12);
         const stacks = manualStacks ? parseInt(manualStacks, 10) : Math.floor(footprintIn / stackW);
         if (stacks <= 0) continue;
         const folds = Math.floor((length / stacks) / (2 * (direction === 'longways' ? l : widthFt)));
-        const totalIn = folds * perFold + 10;
-        const cap = (widthFt === 4 && (l === 4 || l === 7)) || (widthFt === 7 && l === 4) ? 43 : capHeight;
+        const totalIn = folds * perFold + emptyHeightIn;
+        const cap = ((widthFt === 4 && (l === 4 || l === 7)) || (widthFt === 7 && l === 4)) ? 43 : capHeight;
         if (totalIn <= cap) {
-          const freeWidth = Math.abs(footprintIn - (stacks * stackW));
-          results.textContent =
-            `Pallet: ${l}×${widthFt} ft\nStacks: ${stacks}\nStack Width: ${stackW.toFixed(2)} in\nFolds: ${folds}\nHeight: ${(totalIn/12).toFixed(2)} ft\nFree Width: ${freeWidth.toFixed(2)} in`;
+          const freePalletWidth = Math.abs(footprintIn - stacks * stackW);
+          results.textContent = formatResult([
+            `Pallet: ${l}×${widthFt} ft`,
+            `Stacks: ${stacks}`,
+            `Stack Width: ${stackW.toFixed(2)} in`,
+            `Folds: ${folds}`,
+            `Total Height (including pallet): ${formatHeight(totalIn)}`,
+            `Free Pallet Width: ${freePalletWidth.toFixed(2)} in`
+          ]);
           return;
         }
       }
