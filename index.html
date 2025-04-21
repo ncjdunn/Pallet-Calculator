@@ -110,8 +110,8 @@
         if (w===7.5) continue;
         if (w===8 && !isSpecial) continue;
         for (let l of palletLengths) {
-          // Skip 4×4 and 4×8 invalid combinations
-          if (w===4 && (l===4 || l===8)) continue;
+          // Only allow 4×7 when width is 4
+          if (w === 4 && l !== 7) continue;
           if (tryCombo(w,l,L,D,G,'', isSideways)) return;
         }
       }
