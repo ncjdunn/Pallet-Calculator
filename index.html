@@ -125,7 +125,7 @@
 
       // Shop floor per-fold
       const perFold = gauge * 0.3034;
-      const stackW = Math.PI * diameter / 2;
+      const stackW = Math.PI * diameter / 2 - ((-0.9831 + 0.6638 * Math.log(diameter)) * Math.sqrt(gauge));
       const capHeight = 73; // 73 in (~6.08 ft)
       const emptyHeightIn = 10;
 
@@ -196,6 +196,7 @@
         const cap = ((widthFt === 4 && (l === 4 || l === 7)) || (widthFt === 7 && l === 4)) ? 43 : capHeight;
         if (totalIn <= cap) {
           const freeW = Math.abs(footprintIn - stacks * stackW);
+              `Total Stack Width: ${(stackW * stacks).toFixed(2)} in`,
           results.textContent = formatResult([
             `Pallet: ${l}×${widthFt} ft`,
             `Stacks: ${stacks}`,
