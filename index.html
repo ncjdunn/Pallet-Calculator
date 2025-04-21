@@ -18,16 +18,12 @@
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
     .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:160px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
-    .note, .note-secondary { font-size:12px; text-align:left; color:#cfcfcf; margin-bottom:8px; }
-    .note span, .note-secondary span { background:yellow; font-weight:bold; color:#121212; padding:2px 4px; border-radius:2px; }
   </style>
 </head>
 <body>
   <div class="bezel">
     <div class="calculator">
       <h1>John's Better Pallet Calculator <img src="./logo.png" alt="Logo" style="height:40px; vertical-align:middle; margin-left:8px;" /></h1>
-      <div class="note"><span>Note:</span> For 4×7 pallets, select Sideways direction.</div>
-      <div class="note-secondary"><span>Note:</span> For 30.5"–31" liners, stacks first try 1 on 7×7, then 2 on 8×7 if over height cap.</div>
       <div class="grid">
         <label>Liner Length (ft)<input type="number" id="length"></label>
         <label>Diameter (in)<input type="number" id="diameter"></label>
@@ -54,6 +50,17 @@
           <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
           <option>6</option><option>7</option><option>8</option><option>9</option>
         </select></label>
+        <label>Customer<select id="customer">
+          <option value="">None</option>
+          <option value="corby">Corby Stock</option>
+          <option value="uwfl">UW FL</option>
+          <option value="gulf">Gulf Coast</option>
+          <option value="jetjack">Jet Jack</option>
+          <option value="leak">Leak Eliminators</option>
+          <option value="minchem">Min Chem</option>
+          <option value="municipal">Municipal Pipe</option>
+          <option value="suncoast">Suncoast</option>
+        </select></label>
       </div>
       <button id="calculateBtn">Calculate</button>
       <div id="results" class="results"></div>
@@ -69,7 +76,7 @@
     const MAX_HEIGHT_FT = 6;
 
     const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
-    const inputs = ['length','diameter','gauge','manualLength','palletWidth','direction','manualStacks'];
+    const inputs = ['length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer'];
     inputs.forEach(id => {
       const el = document.getElementById(id);
       el.addEventListener('input', calculate);
@@ -89,6 +96,7 @@
       const length = parseFloat(document.getElementById('length').value);
       const diameter = parseFloat(document.getElementById('diameter').value);
       const gauge = parseFloat(document.getElementById('gauge').value);
+      const customer = document.getElementById('customer').value;
       const results = document.getElementById('results');
       if (!length || !diameter || !gauge) {
         results.textContent = 'Please fill in all fields.';
@@ -134,7 +142,6 @@
         }
       }
 
-      // Force 8 ft width for special liners
       if (isSpecial) widthFt = 8;
       for (const l of palletLengths) {
         if (widthFt === 4 && l === 8) continue;
@@ -158,7 +165,8 @@
           `Folds/Stack: ${folds}`,
           `Stack Width: ${stackW.toFixed(2)} in`,
           `Total Height: ${formatHeight(H_in)}`,
-          `Free Pallet Width: ${freeW.toFixed(2)} in`
+          `Free Pallet Width: ${freeW.toFixed(2)} in`,
+          `Customer: ${customer}`
         ]);
         return;
       }
