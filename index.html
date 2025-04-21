@@ -96,7 +96,6 @@
       const length = parseFloat(document.getElementById('length').value);
       const diameter = parseFloat(document.getElementById('diameter').value);
       const gauge = parseFloat(document.getElementById('gauge').value);
-      const customer = document.getElementById('customer').value;
       const results = document.getElementById('results');
       if (!length || !diameter || !gauge) {
         results.textContent = 'Please fill in all fields.';
@@ -113,7 +112,35 @@
       const isSideways = dir === 'sideways';
       if (isSideways) { manualLen = '7'; manualStacks = ''; }
 
-      // Special handling for 30.5"–31": try 7×7 then 8×7
+      // Manual mode: if user selected a pallet length, use it directly
+      if (manualLen) {
+        const l = parseInt(manualLen, 10);
+        const stackW = calculateLayflatWidth(diameter, gauge);
+        let stacks;
+        if (!isSideways) {
+          stacks = Math.floor((widthFt * 12) / stackW);
+        } else {
+          stacks = manualStacks ? parseInt(manualStacks, 10) : Math.floor((l * 12) / stackW);
+        }
+        if (stacks > 0) {
+          const folds = Math.floor((length / stacks) / (2 * l));
+          const H_ft = BASE_HEIGHT_FT + K * ((length / stacks) / (2 * l)) * gauge;
+          const capFt = (l === 4 && widthFt === 7) ? (43/12) : MAX_HEIGHT_FT;
+          const H_in = H_ft * 12;
+          const freeW = Math.abs(widthFt * 12 - stacks * stackW);
+          results.textContent = formatResult([
+            `Pallet: ${widthFt}×${l} ft`,
+            `Stacks: ${stacks}`,
+            `Folds/Stack: ${folds}`,
+            `Stack Width: ${stackW.toFixed(2)} in`,
+            `Total Height: ${formatHeight(H_in)}`,
+            `Free Pallet Width: ${freeW.toFixed(2)} in`
+          ]);
+          return;
+        }
+      }
+
+      // Special handling for 30.5"–31": try 7×7 then 8×7"–31": try 7×7 then 8×7
       if (isSpecial) {
         const stackW = calculateLayflatWidth(diameter, gauge);
         const folds1 = Math.floor((length / 1) / (2 * 7));
@@ -165,8 +192,7 @@
           `Folds/Stack: ${folds}`,
           `Stack Width: ${stackW.toFixed(2)} in`,
           `Total Height: ${formatHeight(H_in)}`,
-          `Free Pallet Width: ${freeW.toFixed(2)} in`,
-          `Customer: ${customer}`
+          `Free Pallet Width: ${freeW.toFixed(2)} in`
         ]);
         return;
       }
