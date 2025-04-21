@@ -25,4 +25,146 @@
 <body>
   <div class="bezel">
     <div class="calculator">
-      <h1>Joh
+      <h1>John's Better Pallet Calculator <img src="./logo.png" alt="Logo" style="height:40px; vertical-align:middle; margin-left:8px;" /></h1>
+      <div class="note"><span>Note:</span> For 4×7 pallets, select Sideways direction.</div>
+      <div class="note-secondary"><span>Note:</span> For 30.5"–31" liners, stacks first try 1 on 7×7, then 2 on 8×7 if over height cap.</div>
+      <div class="grid">
+        <label>Liner Length (ft)<input type="number" id="length"></label>
+        <label>Diameter (in)<input type="number" id="diameter"></label>
+        <label>Gauge (mm)<input type="number" id="gauge"></label>
+        <label>Pallet Length<select id="manualLength">
+          <option value="">Auto</option>
+          <option>4</option><option>7</option><option>9</option><option>12</option><option>15</option>
+          <option>20</option><option>24</option><option>30</option><option>34</option><option>35</option>
+          <option>36</option><option>40</option><option>42</option><option>43</option><option>45</option>
+          <option>48</option><option>53</option><option>58</option><option>60</option><option>65</option>
+          <option>70</option><option>72</option>
+        </select></label>
+        <label>Pallet Width<select id="palletWidth">
+          <option value="auto" selected>Auto</option>
+          <option>4</option><option>7</option><option>7.5</option><option>8</option><option>9</option>
+          <option>12</option><option>15</option><option>20</option>
+        </select></label>
+        <label>Direction<select id="direction">
+          <option value="longways">Longways</option>
+          <option value="sideways">Sideways</option>
+        </select></label>
+        <label>Manual Stacks<select id="manualStacks">
+          <option value="">Auto</option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option>
+        </select></label>
+      </div>
+      <button id="calculateBtn">Calculate</button>
+      <div id="results" class="results"></div>
+      <div style="text-align:center;margin-top:8px;"><a href="error.html" style="color:#bb86fc;text-decoration:underline;">Report an error</a></div>
+    </div>
+  </div>
+  <script>
+    function calculateLayflatWidth(diameter, gauge) {
+      return ((Math.PI * diameter) / 2) * 0.92 - (0.01 * gauge * 12);
+    }
+    const BASE_HEIGHT_FT = 0.56;
+    const K = 0.0272;
+    const MAX_HEIGHT_FT = 6;
+
+    const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
+    const inputs = ['length','diameter','gauge','manualLength','palletWidth','direction','manualStacks'];
+    inputs.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', calculate);
+      el.addEventListener('change', calculate);
+    });
+    document.getElementById('calculateBtn').addEventListener('click', calculate);
+
+    function formatHeight(inches) {
+      const ft = Math.floor(inches / 12);
+      const inch = (inches - ft * 12).toFixed(1);
+      return `${ft} ft ${inch} in`;
+    }
+
+    function formatResult(lines) { return lines.join("\n"); }
+
+    function calculate() {
+      const length = parseFloat(document.getElementById('length').value);
+      const diameter = parseFloat(document.getElementById('diameter').value);
+      const gauge = parseFloat(document.getElementById('gauge').value);
+      const results = document.getElementById('results');
+      if (!length || !diameter || !gauge) {
+        results.textContent = 'Please fill in all fields.';
+        return;
+      }
+
+      let manualLen = document.getElementById('manualLength').value;
+      const widthSel = document.getElementById('palletWidth').value;
+      const dir = document.getElementById('direction').value;
+      let manualStacks = document.getElementById('manualStacks').value;
+
+      let widthFt = widthSel === 'auto' ? (dir === 'sideways' && manualLen ? parseFloat(manualLen) : 7) : parseFloat(widthSel);
+      const isSpecial = !manualLen && diameter >= 30.5 && diameter <= 31;
+      const isSideways = dir === 'sideways';
+      if (isSideways) { manualLen = '7'; manualStacks = ''; }
+
+      // Special handling for 30.5"–31": try 7×7 then 8×7
+      if (isSpecial) {
+        const stackW = calculateLayflatWidth(diameter, gauge);
+        const folds1 = Math.floor((length / 1) / (2 * 7));
+        const H1 = BASE_HEIGHT_FT + K * ((length / 1) / (2 * 7)) * gauge;
+        if (H1 <= MAX_HEIGHT_FT) {
+          results.textContent = formatResult([
+            `Pallet: 7×7 ft`,
+            `Stacks: 1`,
+            `Folds/Stack: ${folds1}`,
+            `Stack Width: ${stackW.toFixed(2)} in`,
+            `Total Height: ${formatHeight(H1 * 12)}`
+          ]);
+          return;
+        }
+        const folds2 = Math.floor((length / 2) / (2 * 8));
+        const H2 = BASE_HEIGHT_FT + K * ((length / 2) / (2 * 8)) * gauge;
+        if (H2 <= MAX_HEIGHT_FT) {
+          results.textContent = formatResult([
+            `Pallet: 8×7 ft`,
+            `Stacks: 2`,
+            `Folds/Stack: ${folds2}`,
+            `Stack Width: ${stackW.toFixed(2)} in`,
+            `Total Height: ${formatHeight(H2 * 12)}`
+          ]);
+          return;
+        }
+      }
+
+      // Force 8 ft width for special liners
+      if (isSpecial) widthFt = 8;
+      for (const l of palletLengths) {
+        if (widthFt === 4 && l === 8) continue;
+        const stackW = calculateLayflatWidth(diameter, gauge);
+        let stacks;
+        if (!isSideways) {
+          stacks = Math.floor((widthFt * 12) / stackW);
+        } else {
+          stacks = manualStacks ? parseInt(manualStacks, 10) : Math.floor((l * 12) / stackW);
+        }
+        if (stacks <= 0) continue;
+        const folds = Math.floor((length / stacks) / (2 * l));
+        const H_ft = BASE_HEIGHT_FT + K * ((length / stacks) / (2 * l)) * gauge;
+        const capFt = (l === 4 && widthFt === 7) ? (43/12) : MAX_HEIGHT_FT;
+        if (H_ft > capFt) continue;
+        const H_in = H_ft * 12;
+        const freeW = Math.abs(widthFt * 12 - stacks * stackW);
+        results.textContent = formatResult([
+          `Pallet: ${widthFt}×${l} ft`,
+          `Stacks: ${stacks}`,
+          `Folds/Stack: ${folds}`,
+          `Stack Width: ${stackW.toFixed(2)} in`,
+          `Total Height: ${formatHeight(H_in)}`,
+          `Free Pallet Width: ${freeW.toFixed(2)} in`
+        ]);
+        return;
+      }
+
+      results.textContent = 'No pallet fits under height restrictions.';
+    }
+  </script>
+</body>
+</html>
