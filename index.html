@@ -64,10 +64,14 @@
     const MAX_HEIGHT_FT = 6;
     const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
     const palletWidths = [4,7,7.5,8,9,12,15,20];
+    const inputIds = ['length','diameter','gauge','manualLength','palletWidth','direction','manualStacks'];
 
     document.getElementById('calculateBtn').addEventListener('click', calculate);
-    ['length','diameter','gauge','manualLength','palletWidth','direction','manualStacks']
-      .forEach(id => document.getElementById(id).addEventListener('change', calculate));
+    inputIds.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('change', calculate);
+      el.addEventListener('input', calculate);
+    });
 
     function formatHeight(inches) {
       const ft = Math.floor(inches / 12);
@@ -81,60 +85,86 @@
       const D = parseFloat(document.getElementById('diameter').value);
       const G = parseFloat(document.getElementById('gauge').value);
       const results = document.getElementById('results');
-      if (!L || !D || !G) return results.textContent = 'Please fill in all fields.';
+      if (!L || !D || !G) {
+        results.textContent = 'Please fill in all fields.';
+        return;
+      }
 
       let manualLen = document.getElementById('manualLength').value;
       let widthSel = document.getElementById('palletWidth').value;
       const isSideways = document.getElementById('direction').value === 'sideways';
       let manualStacks = document.getElementById('manualStacks').value;
 
-      // Default 4×7 for auto-width
       if (widthSel === '4' && !manualLen) manualLen = '7';
 
-      // Manual override
-      if (manualLen) {
-        let w = (widthSel==='auto'?7:parseFloat(widthSel));
-        let l = parseInt(manualLen,10);
-        if (isSideways) [w,l] = [l,w];
-        return tryCombo(w,l,L,D,G,manualStacks);
+      // Manual mode: when both manual length and manual width are selected (ignore height cap)
+      if (manualLen && widthSel !== 'auto') {
+        const mlVal = parseInt(manualLen, 10);
+        const pwVal = parseFloat(widthSel);
+        let w = pwVal;
+        let l = mlVal;
+        if ((mlVal === 4 && pwVal === 7) || (mlVal === 7 && pwVal === 4)) { w = 4; l = 7; }
+        const stackW = calculateLayflatWidth(D, G);
+        const stacks = manualStacks ? parseInt(manualStacks, 10) : (isSideways ? Math.floor(l * 12 / stackW) : Math.floor(w * 12 / stackW));
+        if (stacks <= 0) { results.textContent = 'No stacks fit for selected manual dimensions.'; return; }
+        const lenPerStack = L / stacks;
+        const folds = Math.floor(lenPerStack / (2 * l));
+        const perFold = G * 0.3034;
+        const emptyHeightIn = 10;
+        const totalIn = folds * perFold + emptyHeightIn;
+        const freeW = Math.abs((isSideways ? l : w) * 12 - stacks * stackW);
+        results.textContent = formatResult([
+          `Pallet: ${w}×${l} ft`,
+          `Stacks: ${stacks}`,
+          `Stack Length (1 layer): ${l} ft`,
+          `Length/Stack: ${lenPerStack.toFixed(2)} ft`,
+          `Folds/Stack: ${folds}`,
+          `Stack Width: ${stackW.toFixed(2)} in`,
+          `Total Height (manual): ${formatHeight(totalIn)}`,
+          `Free Pallet Width: ${freeW.toFixed(2)} in`
+        ]);
+        return;
       }
 
-      const isSpecial = D>=30.5 && D<=31;
+      const isSpecial = D >= 30.5 && D <= 31;
       if (isSpecial) {
-        if (tryCombo(7,7, L, D, G,'1')) return;
-        if (tryCombo(8,7, L, D, G,'2')) return;
-      }
-
-      // Auto-mode: iterate widths asc, skipping manual-only widths
-      for (let w of palletWidths) {
-        if (w===7.5) continue;
-        if (w===8 && !isSpecial) continue;
-        for (let l of palletLengths) {
-          // Only allow 4×7 when width is 4
-          if (w === 4 && l !== 7) continue;
-          if (tryCombo(w,l,L,D,G,'', isSideways)) return;
+        // For 30.5"–31", try 1 stack on 7×7 first
+        if (tryCombo(7, 7, L, D, G, '1')) return;
+        // Then try all 8' width pallets in auto-mode with 2 stacks
+        for (let l of palletLengths.filter(l => l >= 7)) {
+          if (tryCombo(8, l, L, D, G, '2')) return;
         }
       }
+
+      // Default auto-mode: exclude 4' widths entirely
+      for (let w of palletWidths.filter(w => w !== 4)) {
+        if (w === 7.5) continue;
+        if (w === 8 && !isSpecial) continue;
+        for (let l of palletLengths) {
+          if (w === 7 && l === 4) continue;
+          if (tryCombo(w, l, L, D, G, '', isSideways)) return;
+        }
+      }
+
       results.textContent = 'No pallet fits under height restrictions.';
     }
 
-    function tryCombo(w,l,L,D,G,manStacks,sideways=false) {
-      const stackW = calculateLayflatWidth(D,G);
-      let stacks;
-      if (manStacks) stacks = parseInt(manStacks,10);
-      else if (!sideways) stacks = Math.floor(w*12/stackW);
-      else stacks = Math.floor(l*12/stackW);
-      if (stacks<=0) return false;
-      const folds = Math.floor((L/stacks)/(2*l));
-      const H_ft = BASE_HEIGHT_FT + K*((L/stacks)/(2*l))*G;
-      // Apply 43" cap for 4×4 and 4×7
-      const capFt = (w===4 && (l===4 || l===7))? (43/12) : MAX_HEIGHT_FT;
-      if (H_ft>capFt) return false;
-      const H_in = H_ft*12;
-      const freeW = Math.abs(w*12 - stacks*stackW);
+    function tryCombo(w, l, L, D, G, manStacks, sideways = false) {
+      const stackW = calculateLayflatWidth(D, G);
+      let stacks = manStacks ? parseInt(manStacks, 10) : (sideways ? Math.floor(l * 12 / stackW) : Math.floor(w * 12 / stackW));
+      if (stacks <= 0) return false;
+      const lenPerStack = L / stacks;
+      const folds = Math.floor(lenPerStack / (2 * l));
+      const H_ft = BASE_HEIGHT_FT + K * (lenPerStack / (2 * l)) * G;
+      const capFt = ((w === 4 && l === 7) ? (43 / 12) : MAX_HEIGHT_FT);
+      if (H_ft > capFt) return false;
+      const H_in = H_ft * 12;
+      const freeW = Math.abs((sideways ? l : w) * 12 - stacks * stackW);
       document.getElementById('results').textContent = formatResult([
         `Pallet: ${w}×${l} ft`,
         `Stacks: ${stacks}`,
+        `Stack Length (1 layer): ${l} ft`,
+        `Length/Stack: ${lenPerStack.toFixed(2)} ft`,
         `Folds/Stack: ${folds}`,
         `Stack Width: ${stackW.toFixed(2)} in`,
         `Total Height: ${formatHeight(H_in)}`,
