@@ -164,20 +164,17 @@
       // Custom rule: special stack counts on 7ft width pallets
       let stacks;
       if (!manStacks && !sideways && w === 7 && D >= 6 && D <= 6.5) {
-        // 6"–6.5" => 9 stacks
+        // 6"–6.5" ⇒ 9 stacks
         stacks = 9;
       } else if (!manStacks && !sideways && w === 7 && D >= 7.5 && D <= 8) {
-        // 7.5"–8" => 7 stacks
+        // 7.5"–8" ⇒ 7 stacks
         stacks = 7;
       } else if (!manStacks && !sideways && w === 7 && D >= 8.5 && D <= 9.5) {
-        // 8.5"–9.5" => 6 stacks
+        // 8.5"–9.5" ⇒ 6 stacks
         stacks = 6;
-      } else if (!manStacks && !sideways && w === 7 && D >= 10 && D <= 11.5) {
-        // 10"–11.5" => 5 stacks
+            } else if (!manStacks && !sideways && w === 7 && D === 12) {
+        // 12" ⇒ 5 stacks
         stacks = 5;
-      } else if (!manStacks && !sideways && w === 7 && D >= 12 && D <= 15) {
-        // 12"–15" => 4 stacks
-        stacks = 4;
       } else {
         stacks = manStacks
           ? parseInt(manStacks, 10)
