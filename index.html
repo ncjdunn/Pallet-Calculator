@@ -147,12 +147,18 @@
         }
       }
 
-      for (let w of palletWidths) {
-        if (w === 7.5) continue;
+      // Auto-mode: only 4', 7', and 8' widths
+      for (let w of palletWidths.filter(w => [4,7,8].includes(w))) {
+        // enforce 4×7 only for 4' width
+        if (w === 4) {
+          if (tryCombo(4, 7, L, D, G, '', isSideways)) return;
+          continue;
+        }
+        // 8' logic: skip if not special range
         if (w === 8 && !isSpecial) continue;
+        // 7' and 8' lengths
         for (let l of palletLengths) {
-          if (w === 7 && l === 4) continue;
-          if (w === 4 && l !== 7) continue;
+          if (w === 7 && l === 4) continue; // skip 7×4
           if (tryCombo(w, l, L, D, G, '', isSideways)) return;
         }
       }
