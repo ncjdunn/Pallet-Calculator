@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#1e1e1e">
   <style>
     body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#121212; color:#e0e0e0; font-family:'Segoe UI', Tahoma, sans-serif; }
-    .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); filter:brightness(1.3) contrast(1.1); }
+    .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); }
     .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; width:360px; text-align:center; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     label, input, select, button { width:100%; }
@@ -17,7 +17,7 @@
     input, select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; text-align:center; }
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
-    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:160px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
+    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:160px; font-size:16px; white-space:pre-wrap; text-align:left; }
   </style>
 </head>
 <body>
@@ -83,7 +83,7 @@
     }
     const BASE_HEIGHT_FT = 0.56;
     const K = 0.0272;
-    const MAX_HEIGHT_FT = 6;
+    const MAX_HEIGHT_IN = 73; // inches
 
     function formatHeight(inches) {
       const ft = Math.floor(inches / 12);
@@ -97,113 +97,84 @@
       const D = parseFloat(document.getElementById('diameter').value);
       const G = parseFloat(document.getElementById('gauge').value);
       const results = document.getElementById('results');
-      if (!L || !D || !G) {
-        results.textContent = 'Please fill in all fields.';
-        return;
-      }
+      if (!L || !D || !G) { results.textContent = 'Please fill in all fields.'; return; }
 
       const manualLen = document.getElementById('manualLength').value;
       const widthSel = document.getElementById('palletWidth').value;
       const isSideways = document.getElementById('direction').value === 'sideways';
       const manualStacks = document.getElementById('manualStacks').value;
 
-      // Manual override
+      // Manual override (ignores max height)
       if (manualLen || widthSel !== 'auto' || manualStacks) {
-        const mlVal = manualLen ? parseInt(manualLen, 10) : null;
-        const pwVal = widthSel !== 'auto' ? parseFloat(widthSel) : null;
-        let w = pwVal !== null ? pwVal : 7;
-        let l = mlVal !== null ? mlVal : 7;
-        if ((mlVal === 4 && pwVal === 7) || (mlVal === 7 && pwVal === 4)) { w = 4; l = 7; }
+        const ml = manualLen ? parseInt(manualLen, 10) : null;
+        const pw = widthSel !== 'auto' ? parseFloat(widthSel) : 7;
+        let w = pw, l = ml || pw;
+        if ((ml === 4 && pw === 7) || (ml === 7 && pw === 4)) { w = 4; l = 7; }
         const stackW = calculateLayflatWidth(D, G);
-        const stacks = manualStacks
-          ? parseInt(manualStacks, 10)
-          : (isSideways
-              ? Math.floor(l * 12 / stackW)
-              : Math.floor(w * 12 / stackW));
+        const stacks = manualStacks ? parseInt(manualStacks,10) : (isSideways ? Math.floor(l*12/stackW) : Math.floor(w*12/stackW));
         if (stacks <= 0) { results.textContent = 'No stacks fit for selected manual dimensions.'; return; }
-        const lenPerStack = L / stacks;
-        const folds = Math.floor(lenPerStack / (2 * l));
-        const perFold = G * 0.3034;
-        const emptyHeightIn = 10;
-        const totalIn = folds * perFold + emptyHeightIn;
-        const freeW = Math.abs((isSideways ? l : w) * 12 - stacks * stackW);
+        const lenPer = L/stacks;
+        const folds = Math.floor(lenPer/(2*l));
+        const perFold = G*0.3034;
+        const totalIn = folds*perFold + 10;
+        const freeW = Math.abs((isSideways?l:w)*12 - stacks*stackW);
         results.textContent = formatResult([
           `Pallet: ${w}×${l} ft`,
           `Stacks: ${stacks}`,
-          `Length/Stack: ${(L/stacks).toFixed(2)} ft`,
+          `Length/Stack: ${lenPer.toFixed(2)} ft`,
           `Folds/Stack: ${folds}`,
           `Stack Width: ${stackW.toFixed(2)} in`,
-          `Total Height (manual): ${formatHeight(totalIn)}`,
+          `Total Height: ${formatHeight(totalIn)}`,
           `Free Pallet Width: ${freeW.toFixed(2)} in`
         ]);
         return;
       }
 
-      const isSpecial = D >= 30.5 && D <= 31;
+      // Auto-mode: special 31" handling
+      const isSpecial = D>=30.5 && D<=31;
       if (isSpecial) {
-        if (tryCombo(7, 7, L, D, G, '1')) return;
-        for (let l of palletLengths.filter(l => l >= 7)) {
-          if (tryCombo(8, l, L, D, G, '2')) return;
-        }
+        if (tryCombo(7,7,L,D,G,'1')) return;
+        for (let l of palletLengths.filter(x=>x>=7)) { if (tryCombo(8,l,L,D,G,'2')) return; }
       }
 
-      // Auto-mode: only 4', 7', and 8' widths
-      for (let w of palletWidths.filter(w => [4,7,8].includes(w))) {
-        // enforce 4×7 only for 4' width
-        if (w === 4) {
-          if (tryCombo(4, 7, L, D, G, '', isSideways)) return;
-          continue;
-        }
-        // 8' logic: skip if not special range
-        if (w === 8 && !isSpecial) continue;
-        // 7' and 8' lengths
+      // Auto-mode: widths 4,7,8
+      for (let w of [4,7,8]) {
+        if (w===4) { if (tryCombo(4,7,L,D,G,'',isSideways)) return; continue; }
+        if (w===8 && !isSpecial) continue;
         for (let l of palletLengths) {
-          if (w === 7 && l === 4) continue; // skip 7×4
-          if (tryCombo(w, l, L, D, G, '', isSideways)) return;
+          if (w===7 && l===4) continue;
+          if (tryCombo(w,l,L,D,G,'',isSideways)) return;
         }
       }
-
       results.textContent = 'No pallet fits under height restrictions.';
     }
 
-    function tryCombo(w, l, L, D, G, manStacks, sideways = false) {
-      // Custom rule: special stack counts on 7ft width pallets
+    function tryCombo(w,l,L,D,G,manStacks,sideways=false) {
+      const stackW = calculateLayflatWidth(D,G);
       let stacks;
-      if (!manStacks && !sideways && w === 7 && D >= 6 && D <= 6.5) {
-        // 6"–6.5" ⇒ 9 stacks
-        stacks = 9;
-      } else if (!manStacks && !sideways && w === 7 && D >= 7.5 && D <= 8) {
-        // 7.5"–8" ⇒ 7 stacks
-        stacks = 7;
-      } else if (!manStacks && !sideways && w === 7 && D >= 8.5 && D <= 9.5) {
-        // 8.5"–9.5" ⇒ 6 stacks
-        stacks = 6;
-            } else if (!manStacks && !sideways && w === 7 && D === 12) {
-        // 12" ⇒ 5 stacks
-        stacks = 5;
-      } else {
-        stacks = manStacks
-          ? parseInt(manStacks, 10)
-          : (sideways
-              ? Math.floor(l * 12 / calculateLayflatWidth(D, G))
-              : Math.floor(w * 12 / calculateLayflatWidth(D, G)));
-      }
-      const stackW = calculateLayflatWidth(D, G);
-      if (stacks <= 0) return false;
-      const lenPerStack = L / stacks;
-      const folds = Math.floor(lenPerStack / (2 * l));
-      const H_ft = BASE_HEIGHT_FT + K * (lenPerStack / (2 * l)) * G;
-      const capFt = (w === 4 && l === 7) ? (43 / 12) : MAX_HEIGHT_FT;
-      if (H_ft > capFt) return false;
-      const H_in = H_ft * 12;
-      const freeW = Math.abs((sideways ? l : w) * 12 - stacks * stackW);
+      // custom 7ft rules
+      if (!manStacks && !sideways && w===7) {
+        if (D>=6 && D<=6.5) stacks=9;
+        else if (D>=7.5 && D<=8) stacks=7;
+        else if (D>=8.5 && D<=9.5) stacks=6;
+        else if (D===12) stacks=5;
+        else stacks = Math.floor(w*12/stackW);
+      } else stacks = manStacks?parseInt(manStacks,10):(sideways?Math.floor(l*12/stackW):Math.floor(w*12/stackW));
+      if (stacks<=0) return false;
+      const lenPer = L/stacks;
+      const folds = Math.floor(lenPer/(2*l));
+      const perFold = G*0.3034;
+      const totalIn = folds*perFold + 10;
+      const capIn = (w===4&&l===7?43:MAX_HEIGHT_IN);
+      if (totalIn>capIn) return false;
+      const freeW = Math.abs((sideways?l:w)*12 - stacks*stackW);
       document.getElementById('results').textContent = formatResult([
         `Pallet: ${w}×${l} ft`,
         `Stacks: ${stacks}`,
-        `Length/Stack: ${(L/stacks).toFixed(2)} ft`,
+        `Length/Stack: ${lenPer.toFixed(2)} ft`,
         `Folds/Stack: ${folds}`,
         `Stack Width: ${stackW.toFixed(2)} in`,
-        `Total Height: ${formatHeight(H_in)}`,
+        `Total Height: ${formatHeight(totalIn)}`,
         `Free Pallet Width: ${freeW.toFixed(2)} in`
       ]);
       return true;
