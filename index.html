@@ -136,12 +136,14 @@
         }
       }
 
-      // Default auto-mode: exclude 4' widths entirely
-      for (let w of palletWidths.filter(w => w !== 4)) {
+            // Default auto-mode: include 4' width only for 4×7 pallets
+      for (let w of palletWidths) {
         if (w === 7.5) continue;
         if (w === 8 && !isSpecial) continue;
         for (let l of palletLengths) {
+          // skip 7×4 and all 4' widths except 4×7
           if (w === 7 && l === 4) continue;
+          if (w === 4 && l !== 7) continue;
           if (tryCombo(w, l, L, D, G, '', isSideways)) return;
         }
       }
