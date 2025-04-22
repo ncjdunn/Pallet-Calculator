@@ -130,7 +130,7 @@
         results.textContent = formatResult([
           `Pallet: ${w}×${l} ft`,
           `Stacks: ${stacks}`,
-          `Length/Stack: ${lenPerStack.toFixed(2)} ft`,
+          `Length/Stack: ${(L/stacks).toFixed(2)} ft`,
           `Folds/Stack: ${folds}`,
           `Stack Width: ${stackW.toFixed(2)} in`,
           `Total Height (manual): ${formatHeight(totalIn)}`,
@@ -172,8 +172,12 @@
       } else if (!manStacks && !sideways && w === 7 && D >= 8.5 && D <= 9.5) {
         // 8.5"–9.5" => 6 stacks
         stacks = 6;
-        // 9"–9.5" => 6 stacks
-        stacks = 6;
+      } else if (!manStacks && !sideways && w === 7 && D >= 10 && D <= 11.5) {
+        // 10"–11.5" => 5 stacks
+        stacks = 5;
+      } else if (!manStacks && !sideways && w === 7 && D >= 12 && D <= 15) {
+        // 12"–15" => 4 stacks
+        stacks = 4;
       } else {
         stacks = manStacks
           ? parseInt(manStacks, 10)
