@@ -14,14 +14,8 @@
     body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#121212; color:#e0e0e0; font-family:'Segoe UI', Tahoma, sans-serif; }
     .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); }
     .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; width:360px; text-align:center; }
+    .checkbox-row { display:flex; gap:8px; margin-bottom:12px; justify-content:space-evenly; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .checkbox-row {
-    display:flex;
-    gap:8px;
-    margin-bottom:12px;
-    justify-content:space-evenly;
-}
-    .checkbox-row label { display:flex; align-items:center; font-size:12px; width:auto; color:#cfcfcf; }
     label, input, select, button { width:100%; }
     label { display:flex; flex-direction:column; align-items:flex-start; font-size:14px; color:#cfcfcf; }
     input, select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; }
@@ -91,7 +85,8 @@
     function calculateLayflatWidth(diameter, gauge, uv) {
       const factor = uv ? 0.94 : 0.92;
       const subTerm = uv ? gauge * 0.00475 : (0.01 * gauge * 12);
-      return ((Math.PI * diameter) / 2) * factor - subTerm;
+      const gaugeOffsetIn = (gauge * 2) / 25.4;
+      return ((Math.PI * diameter) / 2) * factor - subTerm + gaugeOffsetIn;
     }
 
     function formatHeight(inches) {
@@ -123,6 +118,7 @@
       const manualStacks = document.getElementById('manualStacks').value;
       const custVal = document.getElementById('customer').value || 'None';
 
+      // Manual override
       if (manualLen || widthSel !== 'auto' || manualStacks) {
         const ml = manualLen ? parseInt(manualLen, 10) : null;
         const pw = widthSel !== 'auto' ? parseFloat(widthSel) : 7;
@@ -151,12 +147,14 @@
         return;
       }
 
+      // Auto special 31"
       const isSpecial = D>=30.5 && D<=31;
       if (isSpecial) {
         if (tryCombo(7,7,L,D,G,'1',uv)) return;
         for (let l of palletLengths.filter(x=>x>=7)) { if (tryCombo(8,l,L,D,G,'2',uv)) return; }
       }
 
+      // Auto-mode widths 4,7,8
       for (let w of [4,7,8]) {
         if (w===4) { if (tryCombo(4,7,L,D,G,'',uv,isSideways,custVal)) return; continue; }
         if (w===8 && !isSpecial) continue;
