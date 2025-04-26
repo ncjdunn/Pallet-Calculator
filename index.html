@@ -62,82 +62,79 @@
         </select></label>
         <label>Customer<select id="customer">
           <option value="">None</option>
-          <option value="corby">Corby Stock (7.5 ft pallets)</option>
-          <option value="uwfl">UW FL 2000×7.75×6 on 5×7</option>
-          <option value="gulf">Gulf Coast 4000×8×6 on 9×7</option>
-          <option value="jetjack">Jet Jack &lt;5000×7.95×6 on 12×7</option>
-          <option value="leak">Leak Eliminators on 9×7</option>
-          <option value="minchem">Min Chem (max 7×7)</option>
-          <option value="municipal">Municipal Pipe on 9×7</option>
-          <option value="suncoast">Suncoast 3000×8×6 on 7×7</option>
+          <option value="corby">Corby Stock</option>
+          <option value="uwfl">UW FL</option>
+          <option value="gulf">Gulf Coast</option>
+          <option value="jetjack">Jet Jack</option>
+          <option value="leak">Leak Eliminators</option>
+          <option value="minchem">Min Chem</option>
+          <option value="municipal">Municipal Pipe</option>
+          <option value="suncoast">Suncoast</option>
         </select></label>
       </div>
       <button id="calculateBtn">Calculate</button>
+      <label style="margin-top:12px; text-align:left;">Add a 2×4<select id="widthExtension">
+          <option value="0">None</option>
+          <option value="2">1-2x4</option>
+          <option value="4">2-2x4's</option>
+        </select></label>
       <div id="results" class="results"></div>
       <a href="error.html" style="display:block; margin-top:12px; color:#bb86fc;">Report an Error</a>
     </div>
   </div>
   <script>
     const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
-    const inputs = ['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer'];
+    const inputs = ['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension'];
     const MAX_HEIGHT_IN = 73;
-
-    function calculateLayflatWidth(diameter, gauge, uv) {
-      const factor = uv ? 0.94 : 0.92;
-      const subTerm = uv ? gauge * 0.00475 : (0.01 * gauge * 12);
-      const gaugeOffsetIn = (gauge * 2) / 25.4;
-      return ((Math.PI * diameter) / 2) * factor - subTerm + gaugeOffsetIn;
+    function calculateLayflatWidth(diameter,gauge,uv) {
+      const factor = uv?0.94:0.92;
+      const subTerm = uv?gauge*0.00475:(0.01*gauge*12);
+      const gaugeOffsetIn=(gauge*2)/25.4;
+      return ((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
     }
-
-    function formatHeight(inches) {
-      const ft = Math.floor(inches / 12);
-      const inch = (inches - ft * 12).toFixed(1);
+    function formatHeight(inches){
+      const ft=Math.floor(inches/12);
+      const inch=(inches-ft*12).toFixed(1);
       return `${ft} ft ${inch} in`;
     }
-
-    function formatResult(lines) { return lines.join("\n"); }
-
-    inputs.forEach(id => {
-      const el = document.getElementById(id);
-      el.addEventListener('input', calculate);
-      el.addEventListener('change', calculate);
+    function formatResult(lines){return lines.join("\n");}
+    inputs.forEach(id=>{
+      const el=document.getElementById(id);
+      el.addEventListener('input',calculate);
+      el.addEventListener('change',calculate);
     });
-    document.getElementById('calculateBtn').addEventListener('click', calculate);
-
-    function calculate() {
-      const L = parseFloat(document.getElementById('length').value);
-      const D = parseFloat(document.getElementById('diameter').value);
-      const G = parseFloat(document.getElementById('gauge').value);
-      const results = document.getElementById('results');
-      if (!L || !D || !G) { results.textContent = 'Please fill in all fields.'; return; }
-
-      const uv = document.getElementById('uvProduct').checked;
-      const manualLen = document.getElementById('manualLength').value;
-      const widthSel = document.getElementById('palletWidth').value;
-      const isSideways = document.getElementById('direction').value === 'sideways';
-      const manualStacks = document.getElementById('manualStacks').value;
-      const custVal = document.getElementById('customer').value || 'None';
-
+    document.getElementById('calculateBtn').addEventListener('click',calculate);
+    function calculate(){
+      const L=parseFloat(document.getElementById('length').value);
+      const D=parseFloat(document.getElementById('diameter').value);
+      const G=parseFloat(document.getElementById('gauge').value);
+      const results=document.getElementById('results');
+      if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
+      const uv=document.getElementById('uvProduct').checked;
+      const ml=document.getElementById('manualLength').value;
+      const pwVal=document.getElementById('palletWidth').value;
+      const dir=document.getElementById('direction').value;
+      const ms=document.getElementById('manualStacks').value;
+      const cust=document.getElementById('customer').value||'None';
+      const extIn=parseFloat(document.getElementById('widthExtension').value)||0;
       // Manual override
-      if (manualLen || widthSel !== 'auto' || manualStacks) {
-        const ml = manualLen ? parseInt(manualLen, 10) : null;
-        const pw = widthSel !== 'auto' ? parseFloat(widthSel) : 7;
-        let w = pw, l = ml || pw;
-        if ((ml===4&&pw===7)||(ml===7&&pw===4)) { w=4; l=7; }
-        const stackW = calculateLayflatWidth(D, G, uv);
-        const stacks = manualStacks
-          ? parseInt(manualStacks,10)
-          : (isSideways ? Math.floor(l*12/stackW) : Math.floor(w*12/stackW));
-        if (stacks<=0) { results.textContent='No stacks fit for selected manual dimensions.'; return; }
-        const lenPer = L/stacks;
-        const folds = Math.floor(lenPer/(2*l));
-        const perFold = G * (uv ? 0.325 : 0.3034);
-        const totalIn = folds * perFold + 10;
-        const freeW = Math.abs((isSideways?l:w)*12 - stacks*stackW);
-        results.textContent = formatResult([
-          `Pallet: ${w}×${l} ft`,
+      if(ml||pwVal!=='auto'||ms){
+        const l=ml?parseInt(ml,10):null;
+        const pw=pwVal!=='auto'?parseFloat(pwVal):7;
+        let w=pw,pl=l||pw;
+        if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
+        const stackW=calculateLayflatWidth(D,G,uv);
+        const stacks=ms?parseInt(ms,10):(dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW));
+        if(stacks<=0){results.textContent='No stacks fit.';return;}
+        const lenPer=L/stacks;
+        const folds=Math.floor(lenPer/(2*pl));
+        const perFold=G*(uv?0.325:0.3034);
+        const totalIn=folds*perFold+10;
+        const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
+        results.textContent=formatResult([
+          `Pallet: ${w}×${pl} ft`,
           `Stacks: ${stacks}`,
-          `Customer: ${custVal}`,
+          `Customer: ${cust}`,
           `Length/Stack: ${lenPer.toFixed(2)} ft`,
           `Folds/Stack: ${folds}`,
           `Stack Width: ${stackW.toFixed(2)} in`,
@@ -146,45 +143,37 @@
         ]);
         return;
       }
-
-      // Auto special 31"
-      const isSpecial = D>=30.5 && D<=31;
-      if (isSpecial) {
-        if (tryCombo(7,7,L,D,G,'1',uv)) return;
-        for (let l of palletLengths.filter(x=>x>=7)) { if (tryCombo(8,l,L,D,G,'2',uv)) return; }
-      }
-
-      // Auto-mode widths 4,7,8
-      for (let w of [4,7,8]) {
-        if (w===4) { if (tryCombo(4,7,L,D,G,'',uv,isSideways,custVal)) return; continue; }
-        if (w===8 && !isSpecial) continue;
-        for (let l of palletLengths) { if (w===7&&l===4) continue; if (tryCombo(w,l,L,D,G,'',uv,isSideways,custVal)) return; }
+      const isSpec=D>=30.5&&D<=31;
+      if(isSpec){if(tryCombo(7,7,L,D,G,'1',uv,dir,extIn))return;for(let pl of palletLengths.filter(x=>x>=7)){if(tryCombo(8,pl,L,D,G,'2',uv,dir,extIn))return;}}
+      for(let w of[4,7,8]){
+        if(w===4){if(tryCombo(4,7,L,D,G,'',uv,dir,extIn))return;continue;}
+        if(w===8&&!isSpec)continue;
+        for(let pl of palletLengths){if(w===7&&pl===4)continue;if(tryCombo(w,pl,L,D,G,'',uv,dir,extIn))return;}
       }
       results.textContent='No pallet fits under height restrictions.';
     }
-
-    function tryCombo(w,l,L,D,G,manStacks,uv,sideways=false,custVal='None') {
-      const stackW = calculateLayflatWidth(D,G,uv);
+    function tryCombo(w,pl,L,D,G,ms,uv,dir,extIn){
+      const stackW=calculateLayflatWidth(D,G,uv);
       let stacks;
-      if (!manStacks && !sideways && w===7) {
-        if (D>=6&&D<=6.5) stacks=9;
-        else if (D>=7.5&&D<=8) stacks=7;
-        else if (D>=8.5&&D<=9.5) stacks=6;
-        else if (D===12) stacks=5;
-        else stacks=Math.floor(w*12/stackW);
-      } else stacks = manStacks ? parseInt(manStacks,10) : (sideways?Math.floor(l*12/stackW):Math.floor(w*12/stackW));
-      if (stacks<=0) return false;
-      const lenPer = L/stacks;
-      const folds = Math.floor(lenPer/(2*l));
-      const perFold = G * (uv ? 0.325 : 0.3034);
-      const totalIn = folds * perFold + 10;
-      const capIn = (w===4&&l===7 ? 43 : MAX_HEIGHT_IN);
-      if (totalIn>capIn) return false;
-      const freeW = Math.abs((sideways?l:w)*12 - stacks*stackW);
-      document.getElementById('results').textContent = formatResult([
-        `Pallet: ${w}×${l} ft`,
+      if(!ms&&dir!=='sideways'&&w===7){
+        if(D>=6&&D<=6.5)stacks=9;
+        else if(D>=7.5&&D<=8)stacks=7;
+        else if(D>=8.5&&D<=9.5)stacks=6;
+        else if(D===12)stacks=5;
+        else stacks=Math.floor((w*12+extIn)/stackW);
+      } else stacks=dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW);
+      if(stacks<=0)return false;
+      const lenPer=L/stacks;
+      const folds=Math.floor(lenPer/(2*pl));
+      const perFold=G*(uv?0.325:0.3034);
+      const totalIn=folds*perFold+10;
+      const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
+      if(totalIn>cap)return false;
+      const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
+      document.getElementById('results').textContent=formatResult([
+        `Pallet: ${w}×${pl} ft`,
         `Stacks: ${stacks}`,
-        `Customer: ${custVal}`,
+        `Customer: ${document.getElementById('customer').value||'None'}`,
         `Length/Stack: ${lenPer.toFixed(2)} ft`,
         `Folds/Stack: ${folds}`,
         `Stack Width: ${stackW.toFixed(2)} in`,
