@@ -18,11 +18,11 @@
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     label, input, select, button { width:100%; }
     label { display:flex; flex-direction:column; align-items:flex-start; font-size:14px; color:#cfcfcf; }
-    input, select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; }
-    input { text-align:center; }
+    input[type="checkbox"] { margin:0 4px 0 0; transform:scale(1.2); }
+    input[type="number"], select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; }
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
-    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:200px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
+    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:220px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
   </style>
 </head>
 <body>
@@ -73,42 +73,54 @@
         </select></label>
       </div>
       <button id="calculateBtn">Calculate</button>
-      <label style="margin-top:12px; text-align:left;">Add a 2×4<select id="widthExtension">
+      <label style="margin-top:12px; text-align:left;">
+        Add a 2×4
+        <select id="widthExtension">
           <option value="0">None</option>
           <option value="2">1-2x4</option>
           <option value="4">2-2x4's</option>
-        </select></label>
+        </select>
+      </label>
+      <label style="margin-top:12px; display:flex; flex-direction:row; align-items:center;">
+        <span style="margin-right:4px;">Half & Half Stacking</span><input type="checkbox" id="halfStack">
+      </label>
       <div id="results" class="results"></div>
       <a href="error.html" style="display:block; margin-top:12px; color:#bb86fc;">Report an Error</a>
     </div>
   </div>
   <script>
     const palletLengths=[4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
-    const inputs=['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension'];
+    const inputs=['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension','halfStack'];
     const MAX_HEIGHT_IN=73;
+
     function calculateLayflatWidth(diameter,gauge,uv){
       const factor=uv?0.94:0.92;
       const subTerm=uv?gauge*0.00475:(0.01*gauge*12);
       const gaugeOffsetIn=(gauge*2)/25.4;
       return((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
     }
+
     function formatHeight(inches){
       const ft=Math.floor(inches/12);
       const inch=(inches-ft*12).toFixed(1);
       return`${ft} ft ${inch} in`;
     }
+
     function formatResult(lines){return lines.join("\n");}
+
     inputs.forEach(id=>{const el=document.getElementById(id);
       el.addEventListener('input',calculate);
       el.addEventListener('change',calculate);
     });
     document.getElementById('calculateBtn').addEventListener('click',calculate);
+
     function calculate(){
       const L=parseFloat(document.getElementById('length').value);
       const D=parseFloat(document.getElementById('diameter').value);
       const G=parseFloat(document.getElementById('gauge').value);
       const results=document.getElementById('results');
       if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
+
       const uv=document.getElementById('uvProduct').checked;
       const ml=document.getElementById('manualLength').value;
       const pwVal=document.getElementById('palletWidth').value;
@@ -116,7 +128,8 @@
       const ms=document.getElementById('manualStacks').value;
       const cust=document.getElementById('customer').value||'None';
       const extIn=parseFloat(document.getElementById('widthExtension').value)||0;
-      // Manual override
+      const half=document.getElementById('halfStack').checked;
+
       if(ml||pwVal!=='auto'||ms){
         const l=ml?parseInt(ml,10):null;
         const pw=pwVal!=='auto'?parseFloat(pwVal):7;
@@ -130,9 +143,8 @@
         const perFold=G*(uv?0.325:0.3034);
         const totalIn=folds*perFold+10;
         const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
-        // compute takedowns
         const takedowns=[];
-        for(let i=1;i<stacks;i++){takedowns.push((lenPer*i).toFixed(2));}
+        for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val));}
         results.textContent=formatResult([
           `Pallet: ${w}×${pl} ft`,
           `Stacks: ${stacks}`,
@@ -146,27 +158,15 @@
         ]);
         return;
       }
-      // Auto special 31"
       const isSpec=D>=30.5&&D<=31;
-      if(isSpec){if(tryCombo(7,7,L,D,G,'1',uv,dir,extIn))return;for(let pl of palletLengths.filter(x=>x>=7)){if(tryCombo(8,pl,L,D,G,'2',uv,dir,extIn))return;}}
-      // Auto-mode widths
-      for(let w of[4,7,8]){
-        if(w===4){if(tryCombo(4,7,L,D,G,'',uv,dir,extIn))return;continue;}
-        if(w===8&&!isSpec)continue;
-        for(let pl of palletLengths){if(w===7&&pl===4)continue;if(tryCombo(w,pl,L,D,G,'',uv,dir,extIn))return;}
-      }
+      if(isSpec){if(tryCombo(7,7,L,D,G,'1',uv,dir,extIn,half))return;for(let pl of palletLengths.filter(x=>x>=7)){if(tryCombo(8,pl,L,D,G,'2',uv,dir,extIn,half))return;}}
+      for(let w of[4,7,8]){if(w===4){if(tryCombo(4,7,L,D,G,'',uv,dir,extIn,half))return;continue;}if(w===8&&!isSpec)continue;for(let pl of palletLengths){if(w===7&&pl===4)continue;if(tryCombo(w,pl,L,D,G,'',uv,dir,extIn,half))return;}}
       results.textContent='No pallet fits under height restrictions.';
     }
-    function tryCombo(w,pl,L,D,G,ms,uv,dir,extIn){
+    function tryCombo(w,pl,L,D,G,ms,uv,dir,extIn,half){
       const stackW=calculateLayflatWidth(D,G,uv);
       let stacks;
-      if(!ms&&dir!=='sideways'&&w===7){
-        if(D>=6&&D<=6.5)stacks=9;
-        else if(D>=7.5&&D<=8)stacks=7;
-        else if(D>=8.5&&D<=9.5)stacks=6;
-        else if(D===12)stacks=5;
-        else stacks=Math.floor((w*12+extIn)/stackW);
-      } else stacks=dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW);
+      if(!ms&&dir!=='sideways'&&w===7){if(D>=6&&D<=6.5)stacks=9;else if(D>=7.5&&D<=8)stacks=7;else if(D>=8.5&&D<=9.5)stacks=6;else if(D===12)stacks=5;else stacks=Math.floor((w*12+extIn)/stackW);}else stacks=dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW);
       if(stacks<=0)return false;
       const lenPer=L/stacks;
       const folds=Math.floor(lenPer/(2*pl));
@@ -175,9 +175,8 @@
       const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
       if(totalIn>cap)return false;
       const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
-      // compute takedowns
       const takedowns=[];
-      for(let i=1;i<stacks;i++){takedowns.push((lenPer*i).toFixed(2));}
+      for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val));}
       document.getElementById('results').textContent=formatResult([
         `Pallet: ${w}×${pl} ft`,
         `Stacks: ${stacks}`,
