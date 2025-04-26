@@ -22,7 +22,7 @@
     input { text-align:center; }
     button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
-    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:160px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
+    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:200px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
   </style>
 </head>
 <body>
@@ -83,23 +83,22 @@
     </div>
   </div>
   <script>
-    const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
-    const inputs = ['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension'];
-    const MAX_HEIGHT_IN = 73;
-    function calculateLayflatWidth(diameter,gauge,uv) {
-      const factor = uv?0.94:0.92;
-      const subTerm = uv?gauge*0.00475:(0.01*gauge*12);
+    const palletLengths=[4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
+    const inputs=['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension'];
+    const MAX_HEIGHT_IN=73;
+    function calculateLayflatWidth(diameter,gauge,uv){
+      const factor=uv?0.94:0.92;
+      const subTerm=uv?gauge*0.00475:(0.01*gauge*12);
       const gaugeOffsetIn=(gauge*2)/25.4;
-      return ((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
+      return((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
     }
     function formatHeight(inches){
       const ft=Math.floor(inches/12);
       const inch=(inches-ft*12).toFixed(1);
-      return `${ft} ft ${inch} in`;
+      return`${ft} ft ${inch} in`;
     }
     function formatResult(lines){return lines.join("\n");}
-    inputs.forEach(id=>{
-      const el=document.getElementById(id);
+    inputs.forEach(id=>{const el=document.getElementById(id);
       el.addEventListener('input',calculate);
       el.addEventListener('change',calculate);
     });
@@ -131,6 +130,9 @@
         const perFold=G*(uv?0.325:0.3034);
         const totalIn=folds*perFold+10;
         const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
+        // compute takedowns
+        const takedowns=[];
+        for(let i=1;i<stacks;i++){takedowns.push((lenPer*i).toFixed(2));}
         results.textContent=formatResult([
           `Pallet: ${w}×${pl} ft`,
           `Stacks: ${stacks}`,
@@ -139,12 +141,15 @@
           `Folds/Stack: ${folds}`,
           `Stack Width: ${stackW.toFixed(2)} in`,
           `Total Height: ${formatHeight(totalIn)}`,
-          `Free Pallet Width: ${freeW.toFixed(2)} in`
+          `Free Pallet Width: ${freeW.toFixed(2)} in`,
+          `Take Downs: ${takedowns.join(', ')} ft`
         ]);
         return;
       }
+      // Auto special 31"
       const isSpec=D>=30.5&&D<=31;
       if(isSpec){if(tryCombo(7,7,L,D,G,'1',uv,dir,extIn))return;for(let pl of palletLengths.filter(x=>x>=7)){if(tryCombo(8,pl,L,D,G,'2',uv,dir,extIn))return;}}
+      // Auto-mode widths
       for(let w of[4,7,8]){
         if(w===4){if(tryCombo(4,7,L,D,G,'',uv,dir,extIn))return;continue;}
         if(w===8&&!isSpec)continue;
@@ -170,6 +175,9 @@
       const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
       if(totalIn>cap)return false;
       const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
+      // compute takedowns
+      const takedowns=[];
+      for(let i=1;i<stacks;i++){takedowns.push((lenPer*i).toFixed(2));}
       document.getElementById('results').textContent=formatResult([
         `Pallet: ${w}×${pl} ft`,
         `Stacks: ${stacks}`,
@@ -178,7 +186,8 @@
         `Folds/Stack: ${folds}`,
         `Stack Width: ${stackW.toFixed(2)} in`,
         `Total Height: ${formatHeight(totalIn)}`,
-        `Free Pallet Width: ${freeW.toFixed(2)} in`
+        `Free Pallet Width: ${freeW.toFixed(2)} in`,
+        `Take Downs: ${takedowns.join(', ')} ft`
       ]);
       return true;
     }
