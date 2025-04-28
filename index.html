@@ -26,7 +26,7 @@
     <div class="calculator">
       <h1>John's Better Pallet Calculator <img src="logo.png" alt="Logo" style="height:40px; vertical-align:middle; margin-left:8px;"></h1>
       <div id="extensionNote" style="display:none; background:yellow; color:red; padding:6px; border-radius:4px; margin-bottom:12px;">
-        Note: A 1 or 2×4 extension will likely be needed.
+        Note: 1 or 2 2×4 extension will likely be needed.
       </div>
       <div class="checkbox-row">
         <label>UV<input type="checkbox" id="uvProduct"></label>
@@ -105,6 +105,12 @@
 
     inputs.forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',calculate);el.addEventListener('change',calculate);});
     document.getElementById('calculateBtn').addEventListener('click',calculate);
+    // toggle extension note when extension dropdown changes
+    const extEl = document.getElementById('widthExtension');
+    extEl.addEventListener('change', () => {
+      document.getElementById('extensionNote').style.display = extEl.value !== '0' ? 'block' : 'none';
+    });
+
 
     function calculate(){
       const L=parseFloat(document.getElementById('length').value);
