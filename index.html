@@ -164,6 +164,62 @@ function calculate() {
     return;
   }
 
+  // Special 30\.5\"-31\" rule: try 7×7 then 8-ft pallets
+  {
+    const isSpec = D >= 30.5 && D <= 31;
+    if (isSpec) {
+      // try 7×7 first
+      let bestSpec = null;
+      for (const extInTest of [0, 2, 4]) {
+        const specRes = evaluateCombo(7, 7, extInTest);
+        if (specRes && (!bestSpec || specRes.stacks > bestSpec.stacks || (specRes.stacks === bestSpec.stacks && extInTest < bestSpec.ext))) {
+          bestSpec = { ...specRes, ext: extInTest };
+        }
+      }
+      if (bestSpec) {
+        document.getElementById('widthExtension').value = bestSpec.ext;
+        document.getElementById('extensionNote').style.display = bestSpec.ext !== 0 ? 'block' : 'none';
+        results.textContent = formatResult([
+          `Pallet: ${bestSpec.w}×${bestSpec.pl} ft`,
+          `Stacks: ${bestSpec.stacks}`,
+          `Customer: ${cust}`,
+          `Length/Stack: ${bestSpec.lenPer.toFixed(2)} ft`,
+          `Folds/Stack: ${bestSpec.folds}`,
+          `Stack Width: ${bestSpec.stackW.toFixed(2)} in`,
+          `Total Height: ${formatHeight(bestSpec.totalIn)}`,
+          `Free Pallet Width: ${bestSpec.freeW.toFixed(2)} in`,
+          `Take Downs: ${bestSpec.takedowns.join(', ')} ft`
+        ]);
+        return;
+      }
+      // then try all 8-ft pallets
+      for (const pl8 of palletLengths.filter(l => l >= 7)) {
+        let best8 = null;
+        for (const extInTest of [0, 2, 4]) {
+          const eightRes = evaluateCombo(8, pl8, extInTest);
+          if (eightRes && (!best8 || eightRes.stacks > best8.stacks || (eightRes.stacks === best8.stacks && extInTest < best8.ext))) {
+            best8 = { ...eightRes, ext: extInTest };
+          }
+        }
+        if (best8) {
+          document.getElementById('widthExtension').value = best8.ext;
+          document.getElementById('extensionNote').style.display = best8.ext !== 0 ? 'block' : 'none';
+          results.textContent = formatResult([
+            `Pallet: ${best8.w}×${best8.pl} ft`,
+            `Stacks: ${best8.stacks}`,
+            `Customer: ${cust}`,
+            `Length/Stack: ${best8.lenPer.toFixed(2)} ft`,
+            `Folds/Stack: ${best8.folds}`,
+            `Stack Width: ${best8.stackW.toFixed(2)} in`,
+            `Total Height: ${formatHeight(best8.totalIn)}`,
+            `Free Pallet Width: ${best8.freeW.toFixed(2)} in`,
+            `Take Downs: ${best8.takedowns.join(', ')} ft`
+          ]);
+          return;
+        }
+      }
+    }
+  }
   // Auto-mode
   for(const w of [4,7,8]){
     for(const pl of (w===4?[7]:palletLengths)){
