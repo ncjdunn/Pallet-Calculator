@@ -3,33 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>John's Better Pallet Calculator</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="app-icon.png">
   <meta name="theme-color" content="#121212">
   <style>
-    body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#121212; color:#e0e0e0; font-family:'Segoe UI', Tahoma, sans-serif; }
-    .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); }
-    .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; width:360px; text-align:center; }
+    body { margin:0; min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding-top:20px; background:#121212; color:#e0e0e0; font-family:'Segoe UI',sans-serif; overflow-y:auto; }
+    .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); width:100%; max-width:360px; }
+    .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; text-align:center; }
     .checkbox-row { display:flex; gap:8px; margin-bottom:12px; justify-content:space-evenly; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    label, input, select, button { width:100%; }
-    label { display:flex; flex-direction:column; align-items:flex-start; font-size:14px; color:#cfcfcf; }
+    label { display:flex; flex-direction:column; align-items:flex-start; font-size:14px; color:#cfcfcf; width:100%; }
+    input[type="number"], select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; width:100%; }
     input[type="checkbox"] { margin:0 4px 0 0; transform:scale(1.2); }
-    input[type="number"], select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; }
-    button { margin-top:20px; padding:12px; font-size:18px; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
+    button { margin-top:20px; padding:12px; font-size:18px; width:100%; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
-    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:220px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
+    .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:240px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
   </style>
 </head>
 <body>
   <div class="bezel">
     <div class="calculator">
       <h1>John's Better Pallet Calculator <img src="logo.png" alt="Logo" style="height:40px; vertical-align:middle; margin-left:8px;"></h1>
-      <h1>John's Better Pallet Calculator <img src="logo.png" alt="Logo" style="height:40px; margin-left:8px; vertical-align:middle;"></h1>
+      <div id="extensionNote" style="display:none; background:yellow; color:red; padding:6px; border-radius:4px; margin-bottom:12px;">
+        Note: A 1 or 2×4 extension will likely be needed.
+      </div>
       <div class="checkbox-row">
         <label>UV<input type="checkbox" id="uvProduct"></label>
         <label>Placeholder1<input type="checkbox" id="placeholder1"></label>
@@ -82,8 +80,9 @@
           <option value="4">2-2x4's</option>
         </select>
       </label>
-      <label style="margin-top:12px; display:flex; flex-direction:row; align-items:center;">
-        <span style="margin-right:4px;">Half & Half Stacking</span><input type="checkbox" id="halfStack">
+      
+      <label style="margin-top:12px; display:flex; align-items:center;">
+        Half & Half Stacking<input type="checkbox" id="halfStack" style="margin-left:4px;">
       </label>
       <div id="results" class="results"></div>
       <a href="error.html" style="display:block; margin-top:12px; color:#bb86fc;">Report an Error</a>
@@ -101,95 +100,89 @@
       return((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
     }
 
-    function formatHeight(inches){
-      const ft=Math.floor(inches/12);
-      const inch=(inches-ft*12).toFixed(1);
-      return`${ft} ft ${inch} in`;
-    }
-
+    function formatHeight(inches){const ft=Math.floor(inches/12);const inch=(inches-ft*12).toFixed(1);return`${ft} ft ${inch} in`;}
     function formatResult(lines){return lines.join("\n");}
 
-    inputs.forEach(id=>{const el=document.getElementById(id);
-      el.addEventListener('input',calculate);
-      el.addEventListener('change',calculate);
-    });
+    inputs.forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',calculate);el.addEventListener('change',calculate);});
     document.getElementById('calculateBtn').addEventListener('click',calculate);
 
     function calculate(){
       const L=parseFloat(document.getElementById('length').value);
       const D=parseFloat(document.getElementById('diameter').value);
       const G=parseFloat(document.getElementById('gauge').value);
-      const results=document.getElementById('results');
-      if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
-
+      const results=document.getElementById('results'); if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
       const uv=document.getElementById('uvProduct').checked;
       const ml=document.getElementById('manualLength').value;
       const pwVal=document.getElementById('palletWidth').value;
       const dir=document.getElementById('direction').value;
       const ms=document.getElementById('manualStacks').value;
       const cust=document.getElementById('customer').value||'None';
-      const extIn=parseFloat(document.getElementById('widthExtension').value)||0;
+      const extSelect=document.getElementById('widthExtension');
       const half=document.getElementById('halfStack').checked;
 
-      if(ml||pwVal!=='auto'||ms){
-        const l=ml?parseInt(ml,10):null;
-        const pw=pwVal!=='auto'?parseFloat(pwVal):7;
-        let w=pw,pl=l||pw;
-        if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
+      // Auto and manual modes share evaluation
+      function evaluateCombo(w,pl,extIn){
         const stackW=calculateLayflatWidth(D,G,uv);
         const stacks=ms?parseInt(ms,10):(dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW));
-        if(stacks<=0){results.textContent='No stacks fit.';return;}
-        const lenPer=L/stacks;
-        const folds=Math.floor(lenPer/(2*pl));
+        if(stacks<=0) return null;
+        const lenPer=L/stacks; const folds=Math.floor(lenPer/(2*pl));
         const perFold=G*(uv?0.325:0.3034);
         const totalIn=folds*perFold+10;
+        const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
+        if(totalIn>cap) return null;
         const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
-        const takedowns=[];
-        for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val));}
+        const takedowns=[];for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val));}
+        return {w,pl,stacks,lenPer,folds,stackW,totalIn,freeW,takedowns};
+      }
+
+      // Manual override
+      if(ml||pwVal!=='auto'||ms){
+        const l=ml?parseInt(ml,10):null; const pw=pwVal!=='auto'?parseFloat(pwVal):7;
+        let w=pw,pl=l||pw; if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
+        // test ext 0,2,4, prefer smallest ext giving max stacks
+        let best=null;for(const extIn of [0,2,4]){const res=evaluateCombo(w,pl,extIn);if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}} 
+        if(!best){results.textContent='No stacks fit.';return;} extSelect.value=best.ext;
+        // display
         results.textContent=formatResult([
-          `Pallet: ${w}×${pl} ft`,
-          `Stacks: ${stacks}`,
+          `Pallet: ${best.w}×${best.pl} ft`,
+          `Stacks: ${best.stacks}`,
           `Customer: ${cust}`,
-          `Length/Stack: ${lenPer.toFixed(2)} ft`,
-          `Folds/Stack: ${folds}`,
-          `Stack Width: ${stackW.toFixed(2)} in`,
-          `Total Height: ${formatHeight(totalIn)}`,
-          `Free Pallet Width: ${freeW.toFixed(2)} in`,
-          `Take Downs: ${takedowns.join(', ')} ft`
+          `Length/Stack: ${best.lenPer.toFixed(2)} ft`,
+          `Folds/Stack: ${best.folds}`,
+          `Stack Width: ${best.stackW.toFixed(2)} in`,
+          `Total Height: ${formatHeight(best.totalIn)}`,
+          `Free Pallet Width: ${best.freeW.toFixed(2)} in`,
+          `Take Downs: ${best.takedowns.join(', ')} ft`
         ]);
         return;
       }
-      const isSpec=D>=30.5&&D<=31;
-      if(isSpec){if(tryCombo(7,7,L,D,G,'1',uv,dir,extIn,half))return;for(let pl of palletLengths.filter(x=>x>=7)){if(tryCombo(8,pl,L,D,G,'2',uv,dir,extIn,half))return;}}
-      for(let w of[4,7,8]){if(w===4){if(tryCombo(4,7,L,D,G,'',uv,dir,extIn,half))return;continue;}if(w===8&&!isSpec)continue;for(let pl of palletLengths){if(w===7&&pl===4)continue;if(tryCombo(w,pl,L,D,G,'',uv,dir,extIn,half))return;}}
+
+      // Auto-mode
+      for(const w of [4,7,8]){
+        for(const pl of (w===4?[7]:palletLengths)){
+          if(w===7&&pl===4) continue;
+          let best=null;
+          for(const extIn of [0,2,4]){
+            const res=evaluateCombo(w,pl,extIn);
+            if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}
+          }
+          if(best){document.getElementById('widthExtension').value=best.ext;
+            results.textContent=formatResult([
+              `Pallet: ${best.w}×${best.pl} ft`,
+              `Stacks: ${best.stacks}`,
+              `Customer: ${cust}`,
+              `Length/Stack: ${best.lenPer.toFixed(2)} ft`,
+              `Folds/Stack: ${best.folds}`,
+              `Stack Width: ${best.stackW.toFixed(2)} in`,
+              `Total Height: ${formatHeight(best.totalIn)}`,
+              `Free Pallet Width: ${best.freeW.toFixed(2)} in`,
+              `Take Downs: ${best.takedowns.join(', ')} ft`
+            ]);
+            return;
+          }
+        }
+      }
       results.textContent='No pallet fits under height restrictions.';
-    }
-    function tryCombo(w,pl,L,D,G,ms,uv,dir,extIn,half){
-      const stackW=calculateLayflatWidth(D,G,uv);
-      let stacks;
-      if(!ms&&dir!=='sideways'&&w===7){if(D>=6&&D<=6.5)stacks=9;else if(D>=7.5&&D<=8)stacks=7;else if(D>=8.5&&D<=9.5)stacks=6;else if(D===12)stacks=5;else stacks=Math.floor((w*12+extIn)/stackW);}else stacks=dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW);
-      if(stacks<=0)return false;
-      const lenPer=L/stacks;
-      const folds=Math.floor(lenPer/(2*pl));
-      const perFold=G*(uv?0.325:0.3034);
-      const totalIn=folds*perFold+10;
-      const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
-      if(totalIn>cap)return false;
-      const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
-      const takedowns=[];
-      for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val));}
-      document.getElementById('results').textContent=formatResult([
-        `Pallet: ${w}×${pl} ft`,
-        `Stacks: ${stacks}`,
-        `Customer: ${document.getElementById('customer').value||'None'}`,
-        `Length/Stack: ${lenPer.toFixed(2)} ft`,
-        `Folds/Stack: ${folds}`,
-        `Stack Width: ${stackW.toFixed(2)} in`,
-        `Total Height: ${formatHeight(totalIn)}`,
-        `Free Pallet Width: ${freeW.toFixed(2)} in`,
-        `Take Downs: ${takedowns.join(', ')} ft`
-      ]);
-      return true;
     }
   </script>
 </body>
