@@ -147,7 +147,9 @@
         let w=pw,pl=l||pw; if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
         // test ext 0,2,4, prefer smallest ext giving max stacks
         let best=null;for(const extIn of [0,2,4]){const res=evaluateCombo(w,pl,extIn);if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}} 
-        if(!best){results.textContent='No stacks fit.';return;} extSelect.value=best.ext;
+        if(!best){results.textContent='No stacks fit.';return;} extSelect.value = best.ext;
+        // show/hide extension note
+        document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
         // display
         results.textContent=formatResult([
           `Pallet: ${best.w}×${best.pl} ft`,
@@ -173,6 +175,8 @@
             if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}
           }
           if(best){document.getElementById('widthExtension').value=best.ext;
+            // toggle extension note for auto mode
+            document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
             results.textContent=formatResult([
               `Pallet: ${best.w}×${best.pl} ft`,
               `Stacks: ${best.stacks}`,
