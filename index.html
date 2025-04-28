@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>John's Better Pallet Calculator</title>
@@ -78,160 +79,81 @@
           <option value="2">1-2x4</option>
           <option value="4">2-2x4's</option>
         </select>
-      </label><label style="margin-top:12px; display:flex; align-items:center;">
-    Half & Half Stacking<input type="checkbox" id="halfStack" style="margin-left:4px;">
-  </label>
-  <div id="results" class="results"></div>
-  <a href="error.html" style="display:block; margin-top:12px; color:#bb86fc;">Report an Error</a>
-</div>
-
+      </label>
+      
+      <label style="margin-top:12px; display:flex; align-items:center;">
+        Half & Half Stacking<input type="checkbox" id="halfStack" style="margin-left:4px;">
+      </label>
+      <div id="results" class="results"></div>
+      <a href="error.html" style="display:block; margin-top:12px; color:#bb86fc;">Report an Error</a>
+    </div>
   </div>
   <script>
     const palletLengths=[4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
     const inputs=['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension','halfStack'];
-    const MAX_HEIGHT_IN=73;function calculateLayflatWidth(diameter,gauge,uv){
-  const factor=uv?0.94:0.92;
-  const subTerm=uv?gauge*0.00475:(0.01*gauge*12);
-  const gaugeOffsetIn=(gauge*2)/25.4;
-  return((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
-}
+    const MAX_HEIGHT_IN=73;
 
-function formatHeight(inches){const ft=Math.floor(inches/12);const inch=(inches-ft*12).toFixed(1);return`${ft} ft ${inch} in`;}
-function formatResult(lines){return lines.join("\n");}
-
-inputs.forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',calculate);el.addEventListener('change',calculate);});
-document.getElementById('calculateBtn').addEventListener('click',calculate);
-// toggle extension note when extension dropdown changes
-const extEl = document.getElementById('widthExtension');
-extEl.addEventListener('change', () => {
-  document.getElementById('extensionNote').style.display = extEl.value !== '0' ? 'block' : 'none';
-});
-
-
-function calculate() {
-  // hide or show extension note at start of calculation
-  const extNote = document.getElementById('extensionNote');
-  extNote.style.display = document.getElementById('widthExtension').value !== '0' ? 'block' : 'none';
-  const L=parseFloat(document.getElementById('length').value);
-  const D=parseFloat(document.getElementById('diameter').value);
-  const G=parseFloat(document.getElementById('gauge').value);
-  const results=document.getElementById('results'); if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
-  const uv=document.getElementById('uvProduct').checked;
-  const ml=document.getElementById('manualLength').value;
-  const pwVal=document.getElementById('palletWidth').value;
-  const dir=document.getElementById('direction').value;
-  const ms=document.getElementById('manualStacks').value;
-  const cust=document.getElementById('customer').value||'None';
-  const extSelect=document.getElementById('widthExtension');
-  const half=document.getElementById('halfStack').checked;
-
-  // Auto and manual modes share evaluation
-  function evaluateCombo(w,pl,extIn){
-    const stackW=calculateLayflatWidth(D,G,uv);
-    const stacks=ms?parseInt(ms,10):(dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW));
-    if(stacks<=0) return null;
-    const lenPer=L/stacks; const folds=Math.floor(lenPer/(2*pl));
-    const perFold=G*(uv?0.325:0.3034);
-    const totalIn=folds*perFold+10;
-    const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
-    if(totalIn>cap) return null;
-    const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
-    const takedowns=[];for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val));}
-    return {w,pl,stacks,lenPer,folds,stackW,totalIn,freeW,takedowns};
-  }
-
-  // Manual override
-  if(ml||pwVal!=='auto'||ms){
-    const l=ml?parseInt(ml,10):null; const pw=pwVal!=='auto'?parseFloat(pwVal):7;
-    let w=pw,pl=l||pw; if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
-    // test ext 0,2,4, prefer smallest ext giving max stacks
-    let best=null;for(const extIn of [0,2,4]){const res=evaluateCombo(w,pl,extIn);if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}} 
-    if(!best){results.textContent='No stacks fit.';return;} extSelect.value = best.ext;
-    // show/hide extension note
-    document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
-    // display
-    results.textContent=formatResult([
-      `Pallet: ${best.w}×${best.pl} ft`,
-      `Stacks: ${best.stacks}`,
-      `Customer: ${cust}`,
-      `Length/Stack: ${best.lenPer.toFixed(2)} ft`,
-      `Folds/Stack: ${best.folds}`,
-      `Stack Width: ${best.stackW.toFixed(2)} in`,
-      `Total Height: ${formatHeight(best.totalIn)}`,
-      `Free Pallet Width: ${best.freeW.toFixed(2)} in`,
-      `Take Downs: ${best.takedowns.join(', ')} ft`
-    ]);
-    return;
-  }
-
-  // Special 30\.5\"-31\" rule: try 7×7 then 8-ft pallets
-  {
-    const isSpec = D >= 30.5 && D <= 31;
-    if (isSpec) {
-      // try 7×7 first
-      let bestSpec = null;
-      for (const extInTest of [0, 2, 4]) {
-        const specRes = evaluateCombo(7, 7, extInTest);
-        if (specRes && (!bestSpec || specRes.stacks > bestSpec.stacks || (specRes.stacks === bestSpec.stacks && extInTest < bestSpec.ext))) {
-          bestSpec = { ...specRes, ext: extInTest };
-        }
-      }
-      if (bestSpec) {
-        document.getElementById('widthExtension').value = bestSpec.ext;
-        document.getElementById('extensionNote').style.display = bestSpec.ext !== 0 ? 'block' : 'none';
-        results.textContent = formatResult([
-          `Pallet: ${bestSpec.w}×${bestSpec.pl} ft`,
-          `Stacks: ${bestSpec.stacks}`,
-          `Customer: ${cust}`,
-          `Length/Stack: ${bestSpec.lenPer.toFixed(2)} ft`,
-          `Folds/Stack: ${bestSpec.folds}`,
-          `Stack Width: ${bestSpec.stackW.toFixed(2)} in`,
-          `Total Height: ${formatHeight(bestSpec.totalIn)}`,
-          `Free Pallet Width: ${bestSpec.freeW.toFixed(2)} in`,
-          `Take Downs: ${bestSpec.takedowns.join(', ')} ft`
-        ]);
-        return;
-      }
-      // then try all 8-ft pallets
-      for (const pl8 of palletLengths.filter(l => l >= 7)) {
-        let best8 = null;
-        for (const extInTest of [0, 2, 4]) {
-          const eightRes = evaluateCombo(8, pl8, extInTest);
-          if (eightRes && (!best8 || eightRes.stacks > best8.stacks || (eightRes.stacks === best8.stacks && extInTest < best8.ext))) {
-            best8 = { ...eightRes, ext: extInTest };
-          }
-        }
-        if (best8) {
-          document.getElementById('widthExtension').value = best8.ext;
-          document.getElementById('extensionNote').style.display = best8.ext !== 0 ? 'block' : 'none';
-          results.textContent = formatResult([
-            `Pallet: ${best8.w}×${best8.pl} ft`,
-            `Stacks: ${best8.stacks}`,
-            `Customer: ${cust}`,
-            `Length/Stack: ${best8.lenPer.toFixed(2)} ft`,
-            `Folds/Stack: ${best8.folds}`,
-            `Stack Width: ${best8.stackW.toFixed(2)} in`,
-            `Total Height: ${formatHeight(best8.totalIn)}`,
-            `Free Pallet Width: ${best8.freeW.toFixed(2)} in`,
-            `Take Downs: ${best8.takedowns.join(', ')} ft`
-          ]);
-          return;
-        }
-      }
+    function calculateLayflatWidth(diameter,gauge,uv){
+      const factor=uv?0.94:0.92;
+      const subTerm=uv?gauge*0.00475:(0.01*gauge*12);
+      const gaugeOffsetIn=(gauge*2)/25.4;
+      return((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
     }
-  }
-  // Auto-mode
-  for(const w of [4,7,8]){
-    for(const pl of (w===4?[7]:palletLengths)){
-      if(w===7&&pl===4) continue;
-      let best=null;
-      for(const extIn of [0,2,4]){
-        const res=evaluateCombo(w,pl,extIn);
-        if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}
+
+    function formatHeight(inches){const ft=Math.floor(inches/12);const inch=(inches-ft*12).toFixed(1);return`${ft} ft ${inch} in`;}
+    function formatResult(lines){return lines.join("\n");}
+
+    inputs.forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',calculate);el.addEventListener('change',calculate);});
+    document.getElementById('calculateBtn').addEventListener('click',calculate);
+    // toggle extension note when extension dropdown changes
+    const extEl = document.getElementById('widthExtension');
+    extEl.addEventListener('change', () => {
+      document.getElementById('extensionNote').style.display = extEl.value !== '0' ? 'block' : 'none';
+    });
+
+
+    function calculate() {
+      // hide or show extension note at start of calculation
+      const extNote = document.getElementById('extensionNote');
+      extNote.style.display = document.getElementById('widthExtension').value !== '0' ? 'block' : 'none';
+      const L=parseFloat(document.getElementById('length').value);
+      const D=parseFloat(document.getElementById('diameter').value);
+      const G=parseFloat(document.getElementById('gauge').value);
+      const results=document.getElementById('results'); if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
+      const uv=document.getElementById('uvProduct').checked;
+      const ml=document.getElementById('manualLength').value;
+      const pwVal=document.getElementById('palletWidth').value;
+      const dir=document.getElementById('direction').value;
+      const ms=document.getElementById('manualStacks').value;
+      const cust=document.getElementById('customer').value||'None';
+      const extSelect=document.getElementById('widthExtension');
+      const half=document.getElementById('halfStack').checked;
+
+      // Auto and manual modes share evaluation
+      function evaluateCombo(w,pl,extIn){
+        const stackW=calculateLayflatWidth(D,G,uv);
+        const stacks=ms?parseInt(ms,10):(dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW));
+        if(stacks<=0) return null;
+        const lenPer=L/stacks; const folds=Math.floor(lenPer/(2*pl));
+        const perFold=G*(uv?0.325:0.3034);
+        const totalIn=folds*perFold+10;
+        const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
+        if(totalIn>cap) return null;
+        const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
+        const takedowns=[];for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val/5)*5);}
+        return {w,pl,stacks,lenPer,folds,stackW,totalIn,freeW,takedowns};
       }
-      if(best){document.getElementById('widthExtension').value=best.ext;
-        // toggle extension note for auto mode
+
+      // Manual override
+      if(ml||pwVal!=='auto'||ms){
+        const l=ml?parseInt(ml,10):null; const pw=pwVal!=='auto'?parseFloat(pwVal):7;
+        let w=pw,pl=l||pw; if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
+        // test ext 0,2,4, prefer smallest ext giving max stacks
+        let best=null;for(const extIn of [0,2,4]){const res=evaluateCombo(w,pl,extIn);if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}} 
+        if(!best){results.textContent='No stacks fit.';return;} extSelect.value = best.ext;
+        // show/hide extension note
         document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
+        // display
         results.textContent=formatResult([
           `Pallet: ${best.w}×${best.pl} ft`,
           `Stacks: ${best.stacks}`,
@@ -245,11 +167,92 @@ function calculate() {
         ]);
         return;
       }
-    }
-  }
-  results.textContent='No pallet fits under height restrictions.';
-}
 
+      // Special 30\.5\"-31\" rule: try 7×7 then 8-ft pallets
+      {
+        const isSpec = D >= 30.5 && D <= 31;
+        if (isSpec) {
+          // try 7×7 first
+          let bestSpec = null;
+          for (const extInTest of [0, 2, 4]) {
+            const specRes = evaluateCombo(7, 7, extInTest);
+            if (specRes && (!bestSpec || specRes.stacks > bestSpec.stacks || (specRes.stacks === bestSpec.stacks && extInTest < bestSpec.ext))) {
+              bestSpec = { ...specRes, ext: extInTest };
+            }
+          }
+          if (bestSpec) {
+            document.getElementById('widthExtension').value = bestSpec.ext;
+            document.getElementById('extensionNote').style.display = bestSpec.ext !== 0 ? 'block' : 'none';
+            results.textContent = formatResult([
+              `Pallet: ${bestSpec.w}×${bestSpec.pl} ft`,
+              `Stacks: ${bestSpec.stacks}`,
+              `Customer: ${cust}`,
+              `Length/Stack: ${bestSpec.lenPer.toFixed(2)} ft`,
+              `Folds/Stack: ${bestSpec.folds}`,
+              `Stack Width: ${bestSpec.stackW.toFixed(2)} in`,
+              `Total Height: ${formatHeight(bestSpec.totalIn)}`,
+              `Free Pallet Width: ${bestSpec.freeW.toFixed(2)} in`,
+              `Take Downs: ${bestSpec.takedowns.join(', ')} ft`
+            ]);
+            return;
+          }
+          // then try all 8-ft pallets
+          for (const pl8 of palletLengths.filter(l => l >= 7)) {
+            let best8 = null;
+            for (const extInTest of [0, 2, 4]) {
+              const eightRes = evaluateCombo(8, pl8, extInTest);
+              if (eightRes && (!best8 || eightRes.stacks > best8.stacks || (eightRes.stacks === best8.stacks && extInTest < best8.ext))) {
+                best8 = { ...eightRes, ext: extInTest };
+              }
+            }
+            if (best8) {
+              document.getElementById('widthExtension').value = best8.ext;
+              document.getElementById('extensionNote').style.display = best8.ext !== 0 ? 'block' : 'none';
+              results.textContent = formatResult([
+                `Pallet: ${best8.w}×${best8.pl} ft`,
+                `Stacks: ${best8.stacks}`,
+                `Customer: ${cust}`,
+                `Length/Stack: ${best8.lenPer.toFixed(2)} ft`,
+                `Folds/Stack: ${best8.folds}`,
+                `Stack Width: ${best8.stackW.toFixed(2)} in`,
+                `Total Height: ${formatHeight(best8.totalIn)}`,
+                `Free Pallet Width: ${best8.freeW.toFixed(2)} in`,
+                `Take Downs: ${best8.takedowns.join(', ')} ft`
+              ]);
+              return;
+            }
+          }
+        }
+      }
+      // Auto-mode
+      for(const w of [4,7,8]){
+        for(const pl of (w===4?[7]:palletLengths)){
+          if(w===7&&pl===4) continue;
+          let best=null;
+          for(const extIn of [0,2,4]){
+            const res=evaluateCombo(w,pl,extIn);
+            if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}
+          }
+          if(best){document.getElementById('widthExtension').value=best.ext;
+            // toggle extension note for auto mode
+            document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
+            results.textContent=formatResult([
+              `Pallet: ${best.w}×${best.pl} ft`,
+              `Stacks: ${best.stacks}`,
+              `Customer: ${cust}`,
+              `Length/Stack: ${best.lenPer.toFixed(2)} ft`,
+              `Folds/Stack: ${best.folds}`,
+              `Stack Width: ${best.stackW.toFixed(2)} in`,
+              `Total Height: ${formatHeight(best.totalIn)}`,
+              `Free Pallet Width: ${best.freeW.toFixed(2)} in`,
+              `Take Downs: ${best.takedowns.join(', ')} ft`
+            ]);
+            return;
+          }
+        }
+      }
+      results.textContent='No pallet fits under height restrictions.';
+    }
   </script>
 </body>
 </html>
