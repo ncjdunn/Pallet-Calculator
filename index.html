@@ -8,26 +8,34 @@
   <link rel="icon" href="app-icon.png">
   <meta name="theme-color" content="#121212">
   <style>
-    body { margin:0; min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding-top:20px; background:#121212; color:#e0e0e0; font-family:'Segoe UI',sans-serif; overflow-y:auto; }
+    body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background:#121212; color:#e0e0e0; font-family:'Segoe UI',sans-serif; }
     .bezel { background:url('wood_grain_texture.jpg') no-repeat center center; background-size:cover; padding:16px; border-radius:16px; box-shadow:0 0 12px rgba(0,0,0,0.5); width:100%; max-width:360px; }
-    .calculator { background:#1e1e1e; border-radius:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.7); padding:24px; text-align:center; }
+    .calculator {
+      background:#1e1e1e;
+      border-radius:8px;
+      box-shadow:inset 0 2px 8px rgba(0,0,0,0.7);
+      padding:24px;
+      text-align:center;
+      width:100%;
+      max-width:360px;
+      box-sizing:border-box;
+    }
     .checkbox-row { display:flex; gap:8px; margin-bottom:12px; justify-content:space-evenly; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     label { display:flex; flex-direction:column; align-items:flex-start; font-size:14px; color:#cfcfcf; width:100%; }
-    input[type="number"], select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; width:100%; }
+    input[type="number"], select { margin-top:6px; padding:8px; font-size:16px; border:1px solid #444; border-radius:6px; background:#2c2c2c; color:#e0e0e0; }
     input[type="checkbox"] { margin:0 4px 0 0; transform:scale(1.2); }
     button { margin-top:20px; padding:12px; font-size:18px; width:100%; border:none; border-radius:6px; background:#bb86fc; color:#121212; cursor:pointer; font-weight:bold; }
     button:hover { background:#9a65d1; }
     .results { margin-top:24px; background:#2c2c2c; padding:12px; border-radius:6px; min-height:240px; font-size:16px; white-space:pre-wrap; text-align:left; color:#e0e0e0; }
+    .note { display:none; background:yellow; color:red; padding:6px; border-radius:4px; margin-bottom:12px; font-size:13px; }
   </style>
 </head>
 <body>
   <div class="bezel">
     <div class="calculator">
       <h1>John's Better Pallet Calculator <img src="logo.png" alt="Logo" style="height:40px; vertical-align:middle; margin-left:8px;"></h1>
-      <div id="extensionNote" style="display:none; background:yellow; color:red; padding:6px; border-radius:4px; margin-bottom:12px;">
-        Note: 1 or 2 2×4 extension will likely be needed.
-      </div>
+      <div id="extensionNote" class="note">Note: 1 or 2 2×4 extension will likely be needed.</div>
       <div class="checkbox-row">
         <label>UV<input type="checkbox" id="uvProduct"></label>
         <label>Placeholder1<input type="checkbox" id="placeholder1"></label>
@@ -55,106 +63,116 @@
           <option value="sideways">Sideways</option>
         </select></label>
         <label>Manual Stacks<select id="manualStacks">
-          <option value="">Auto</option>
-          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-          <option>6</option><option>7</option><option>8</option><option>9</option>
+          <option value="">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
         </select></label>
         <label>Customer<select id="customer">
-          <option value="">None</option>
-          <option value="corby">Corby Stock</option>
-          <option value="uwfl">UW FL</option>
-          <option value="gulf">Gulf Coast</option>
-          <option value="jetjack">Jet Jack</option>
-          <option value="leak">Leak Eliminators</option>
-          <option value="minchem">Min Chem</option>
-          <option value="municipal">Municipal Pipe</option>
-          <option value="suncoast">Suncoast</option>
+          <option value="">None</option><option value="corby">Corby Stock</option><option value="uwfl">UW FL</option>
+          <option value="gulf">Gulf Coast</option><option value="jetjack">Jet Jack</option><option value="leak">Leak Eliminators</option>
+          <option value="minchem">Min Chem</option><option value="municipal">Municipal Pipe</option><option value="suncoast">Suncoast</option>
         </select></label>
       </div>
       <button id="calculateBtn">Calculate</button>
-      <label style="margin-top:12px; text-align:left;">
-        Add a 2×4
-        <select id="widthExtension">
-          <option value="0">None</option>
-          <option value="2">1-2x4</option>
-          <option value="4">2-2x4's</option>
-        </select>
-      </label>
-      
-      <label style="margin-top:12px; display:flex; align-items:center;">
-        Half & Half Stacking<input type="checkbox" id="halfStack" style="margin-left:4px;">
-      </label>
+      <label style="margin-top:12px; text-align:left;">Add a 2×4<select id="widthExtension">
+          <option value="0">None</option><option value="2">1-2x4</option><option value="4">2-2x4's</option>
+        </select></label>
+      <label style="margin-top:12px; display:flex; align-items:center;">Half & Half Stacking<input type="checkbox" id="halfStack" style="margin-left:4px;"></label>
       <div id="results" class="results"></div>
       <a href="error.html" style="display:block; margin-top:12px; color:#bb86fc;">Report an Error</a>
     </div>
   </div>
   <script>
-    const palletLengths=[4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
-    const inputs=['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension','halfStack'];
-    const MAX_HEIGHT_IN=73;
+    const palletLengths = [4,7,9,12,15,20,24,30,34,35,36,40,42,43,45,48,53,58,60,65,70,72];
+    const inputs = ['uvProduct','length','diameter','gauge','manualLength','palletWidth','direction','manualStacks','customer','widthExtension','halfStack'];
+    const MAX_HEIGHT_IN = 73;
 
-    function calculateLayflatWidth(diameter,gauge,uv){
-      const factor=uv?0.94:0.92;
-      const subTerm=uv?gauge*0.00475:(0.01*gauge*12);
-      const gaugeOffsetIn=(gauge*2)/25.4;
-      return((Math.PI*diameter)/2)*factor - subTerm + gaugeOffsetIn;
+    function calculateLayflatWidth(d, g, uv) {
+      const factor = uv ? 0.94 : 0.92;
+      const subTerm = uv ? g * 0.00475 : 0.01 * g * 12;
+      const gaugeOffsetIn = (g * 2) / 25.4;
+      return Math.PI * d / 2 * factor - subTerm + gaugeOffsetIn;
     }
 
-    function formatHeight(inches){const ft=Math.floor(inches/12);const inch=(inches-ft*12).toFixed(1);return`${ft} ft ${inch} in`;}
-    function formatResult(lines){return lines.join("\n");}
+    function formatHeight(inches) {
+      const ft = Math.floor(inches / 12);
+      const inch = (inches - ft * 12).toFixed(1);
+      return `${ft} ft ${inch} in`;
+    }
 
-    inputs.forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',calculate);el.addEventListener('change',calculate);});
-    document.getElementById('calculateBtn').addEventListener('click',calculate);
-    // toggle extension note when extension dropdown changes
-    const extEl = document.getElementById('widthExtension');
-    extEl.addEventListener('change', () => {
-      document.getElementById('extensionNote').style.display = extEl.value !== '0' ? 'block' : 'none';
+    function formatResult(lines) {
+      return lines.join("\n");
+    }
+
+    inputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', calculate);
+        el.addEventListener('change', calculate);
+      }
     });
-
+    document.getElementById('calculateBtn').addEventListener('click', calculate);
 
     function calculate() {
-      // hide or show extension note at start of calculation
+      const L = parseFloat(document.getElementById('length').value);
+      const D = parseFloat(document.getElementById('diameter').value);
+      const G = parseFloat(document.getElementById('gauge').value);
+      const results = document.getElementById('results');
       const extNote = document.getElementById('extensionNote');
       extNote.style.display = document.getElementById('widthExtension').value !== '0' ? 'block' : 'none';
-      const L=parseFloat(document.getElementById('length').value);
-      const D=parseFloat(document.getElementById('diameter').value);
-      const G=parseFloat(document.getElementById('gauge').value);
-      const results=document.getElementById('results'); if(!L||!D||!G){results.textContent='Please fill in all fields.';return;}
-      const uv=document.getElementById('uvProduct').checked;
-      const ml=document.getElementById('manualLength').value;
-      const pwVal=document.getElementById('palletWidth').value;
-      const dir=document.getElementById('direction').value;
-      const ms=document.getElementById('manualStacks').value;
-      const cust=document.getElementById('customer').value||'None';
-      const extSelect=document.getElementById('widthExtension');
-      const half=document.getElementById('halfStack').checked;
 
-      // Auto and manual modes share evaluation
-      function evaluateCombo(w,pl,extIn){
-        const stackW=calculateLayflatWidth(D,G,uv);
-        const stacks=ms?parseInt(ms,10):(dir==='sideways'?Math.floor((pl*12+extIn)/stackW):Math.floor((w*12+extIn)/stackW));
-        if(stacks<=0) return null;
-        const lenPer=L/stacks; const folds=Math.floor(lenPer/(2*pl));
-        const perFold=G*(uv?0.325:0.3034);
-        const totalIn=folds*perFold+10;
-        const cap=(w===4&&pl===7?43:MAX_HEIGHT_IN);
-        if(totalIn>cap) return null;
-        const freeW=Math.abs((dir==='sideways'?pl*12:w*12)+extIn-stacks*stackW);
-        const takedowns=[];for(let i=1;i<stacks;i++){let val=lenPer*i;if(half)val/=2;takedowns.push(Math.round(val/5)*5);}
-        return {w,pl,stacks,lenPer,folds,stackW,totalIn,freeW,takedowns};
+      if (!L || !D || !G) {
+        results.textContent = 'Please fill in all fields.';
+        return;
+      }
+      const uv = document.getElementById('uvProduct').checked;
+      const ml = document.getElementById('manualLength').value;
+      const pwVal = document.getElementById('palletWidth').value;
+      const dir = document.getElementById('direction').value;
+      const ms = document.getElementById('manualStacks').value;
+      const cust = document.getElementById('customer').value || 'None';
+      const extEl = document.getElementById('widthExtension');
+      const half = document.getElementById('halfStack').checked;
+
+      function evaluateCombo(w, pl, extIn) {
+        const stackW = calculateLayflatWidth(D, G, uv);
+        const stacks = ms ? parseInt(ms) : (dir === 'sideways' ? Math.floor((pl * 12 + extIn) / stackW) : Math.floor((w * 12 + extIn) / stackW));
+        if (stacks <= 0) return null;
+        const lenPer = L / stacks;
+        const folds = Math.floor(lenPer / (2 * pl));
+        const perFold = G * (uv ? 0.325 : 0.3034);
+        const totalIn = folds * perFold + 10;
+        const cap = (w === 4 && pl === 7) ? 43 : MAX_HEIGHT_IN;
+        if (!ml && !ms && totalIn > cap) return null;
+        const freeW = Math.abs((dir === 'sideways' ? pl * 12 : w * 12) + extIn - stacks * stackW);
+        const takedowns = [];
+        for (let i = 1; i < stacks; i++) {
+          let val = lenPer * i;
+          if (half) val /= 2;
+          takedowns.push(Math.round(val / 5) * 5);
+        }
+        return { w, pl, stacks, lenPer, folds, stackW, totalIn, freeW, takedowns };
       }
 
       // Manual override
-      if(ml||pwVal!=='auto'||ms){
-        const l=ml?parseInt(ml,10):null; const pw=pwVal!=='auto'?parseFloat(pwVal):7;
-        let w=pw,pl=l||pw; if((l===4&&pw===7)||(l===7&&pw===4)){w=4;pl=7;}
-        // test ext 0,2,4, prefer smallest ext giving max stacks
-        let best=null;for(const extIn of [0,2,4]){const res=evaluateCombo(w,pl,extIn);if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}} 
-        if(!best){results.textContent='No stacks fit.';return;} extSelect.value = best.ext;
-        // show/hide extension note
-        document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
-        // display
-        results.textContent=formatResult([
+      if (ml || pwVal !== 'auto' || ms) {
+        const l = ml ? parseInt(ml) : null;
+        const pw = pwVal !== 'auto' ? parseFloat(pwVal) : 7;
+        let w = pw, pl = l || pw;
+        if ((l === 4 && pw === 7) || (l === 7 && pw === 4)) { w = 4; pl = 7; }
+        let best = null;
+        [0, 2, 4].forEach(extIn => {
+          const res = evaluateCombo(w, pl, extIn);
+          if (res && (!best || res.stacks > best.stacks || (res.stacks === best.stacks && extIn < best.ext))) {
+            best = { ...res, ext: extIn };
+          }
+        });
+        if (!best) {
+          results.textContent = 'No stacks fit.';
+          return;
+        }
+        extEl.value = best.ext;
+        extNote.style.display = best.ext ? 'block' : 'none';
+        results.textContent = formatResult([
           `Pallet: ${best.w}×${best.pl} ft`,
           `Stacks: ${best.stacks}`,
           `Customer: ${cust}`,
@@ -168,90 +186,92 @@
         return;
       }
 
-      // Special 30\.5\"-31\" rule: try 7×7 then 8-ft pallets
-      {
-        const isSpec = D >= 30.5 && D <= 31;
-        if (isSpec) {
-          // try 7×7 first
-          let bestSpec = null;
-          for (const extInTest of [0, 2, 4]) {
-            const specRes = evaluateCombo(7, 7, extInTest);
-            if (specRes && (!bestSpec || specRes.stacks > bestSpec.stacks || (specRes.stacks === bestSpec.stacks && extInTest < bestSpec.ext))) {
-              bestSpec = { ...specRes, ext: extInTest };
-            }
+      // Special case 30.5"–31"
+      if (D >= 30.5 && D <= 31) {
+        // Try 7×7
+        let specBest = null;
+        [0, 2, 4].forEach(extIn => {
+          const res = evaluateCombo(7, 7, extIn);
+          if (res && (!specBest || res.stacks > specBest.stacks || (res.stacks === specBest.stacks && extIn < specBest.ext))) {
+            specBest = { ...res, ext: extIn };
           }
-          if (bestSpec) {
-            document.getElementById('widthExtension').value = bestSpec.ext;
-            document.getElementById('extensionNote').style.display = bestSpec.ext !== 0 ? 'block' : 'none';
+        });
+        if (specBest) {
+          extEl.value = specBest.ext;
+          extNote.style.display = specBest.ext ? 'block' : 'none';
+          results.textContent = formatResult([
+            `Pallet: ${specBest.w}×${specBest.pl} ft`,
+            `Stacks: ${specBest.stacks}`,
+            `Customer: ${cust}`,
+            `Length/Stack: ${specBest.lenPer.toFixed(2)} ft`,
+            `Folds/Stack: ${specBest.folds}`,
+            `Stack Width: ${specBest.stackW.toFixed(2)} in`,
+            `Total Height: ${formatHeight(specBest.totalIn)}`,
+            `Free Pallet Width: ${specBest.freeW.toFixed(2)} in`,
+            `Take Downs: ${specBest.takedowns.join(', ')} ft`
+          ]);
+          return;
+        }
+        // Then 8-ft pallets
+        for (let pl of palletLengths.filter(x => x >= 7)) {
+          let best8 = null;
+          [0, 2, 4].forEach(extIn => {
+            const res = evaluateCombo(8, pl, extIn);
+            if (res && (!best8 || res.stacks > best8.stacks || (res.stacks === best8.stacks && extIn < best8.ext))) {
+              best8 = { ...res, ext: extIn };
+            }
+          });
+          if (best8) {
+            extEl.value = best8.ext;
+            extNote.style.display = best8.ext ? 'block' : 'none';
             results.textContent = formatResult([
-              `Pallet: ${bestSpec.w}×${bestSpec.pl} ft`,
-              `Stacks: ${bestSpec.stacks}`,
+              `Pallet: ${best8.w}×${best8.pl} ft`,
+              `Stacks: ${best8.stacks}`,
               `Customer: ${cust}`,
-              `Length/Stack: ${bestSpec.lenPer.toFixed(2)} ft`,
-              `Folds/Stack: ${bestSpec.folds}`,
-              `Stack Width: ${bestSpec.stackW.toFixed(2)} in`,
-              `Total Height: ${formatHeight(bestSpec.totalIn)}`,
-              `Free Pallet Width: ${bestSpec.freeW.toFixed(2)} in`,
-              `Take Downs: ${bestSpec.takedowns.join(', ')} ft`
-            ]);
-            return;
-          }
-          // then try all 8-ft pallets
-          for (const pl8 of palletLengths.filter(l => l >= 7)) {
-            let best8 = null;
-            for (const extInTest of [0, 2, 4]) {
-              const eightRes = evaluateCombo(8, pl8, extInTest);
-              if (eightRes && (!best8 || eightRes.stacks > best8.stacks || (eightRes.stacks === best8.stacks && extInTest < best8.ext))) {
-                best8 = { ...eightRes, ext: extInTest };
-              }
-            }
-            if (best8) {
-              document.getElementById('widthExtension').value = best8.ext;
-              document.getElementById('extensionNote').style.display = best8.ext !== 0 ? 'block' : 'none';
-              results.textContent = formatResult([
-                `Pallet: ${best8.w}×${best8.pl} ft`,
-                `Stacks: ${best8.stacks}`,
-                `Customer: ${cust}`,
-                `Length/Stack: ${best8.lenPer.toFixed(2)} ft`,
-                `Folds/Stack: ${best8.folds}`,
-                `Stack Width: ${best8.stackW.toFixed(2)} in`,
-                `Total Height: ${formatHeight(best8.totalIn)}`,
-                `Free Pallet Width: ${best8.freeW.toFixed(2)} in`,
-                `Take Downs: ${best8.takedowns.join(', ')} ft`
-              ]);
-              return;
-            }
-          }
-        }
-      }
-      // Auto-mode
-      for(const w of [4,7,8]){
-        for(const pl of (w===4?[7]:palletLengths)){
-          if(w===7&&pl===4) continue;
-          let best=null;
-          for(const extIn of [0,2,4]){
-            const res=evaluateCombo(w,pl,extIn);
-            if(res&&( (!best)||(res.stacks>best.stacks)||(res.stacks===best.stacks&&extIn<best.ext))){best={...res,ext:extIn};}
-          }
-          if(best){document.getElementById('widthExtension').value=best.ext;
-            // toggle extension note for auto mode
-            document.getElementById('extensionNote').style.display = best.ext !== 0 && best.ext !== '0' ? 'block' : 'none';
-            results.textContent=formatResult([
-              `Pallet: ${best.w}×${best.pl} ft`,
-              `Stacks: ${best.stacks}`,
-              `Customer: ${cust}`,
-              `Length/Stack: ${best.lenPer.toFixed(2)} ft`,
-              `Folds/Stack: ${best.folds}`,
-              `Stack Width: ${best.stackW.toFixed(2)} in`,
-              `Total Height: ${formatHeight(best.totalIn)}`,
-              `Free Pallet Width: ${best.freeW.toFixed(2)} in`,
-              `Take Downs: ${best.takedowns.join(', ')} ft`
+              `Length/Stack: ${best8.lenPer.toFixed(2)} ft`,
+              `Folds/Stack: ${best8.folds}`,
+              `Stack Width: ${best8.stackW.toFixed(2)} in`,
+              `Total Height: ${formatHeight(best8.totalIn)}`,
+              `Free Pallet Width: ${best8.freeW.toFixed(2)} in`,
+              `Take Downs: ${best8.takedowns.join(', ')} ft`
             ]);
             return;
           }
         }
       }
-      results.textContent='No pallet fits under height restrictions.';
+
+      // Default auto-mode
+      for (let w of [4, 7, 8]) {
+        const lengths = w === 4 ? [7] : palletLengths;
+        for (let pl of lengths) {
+          if (w === 7 && pl === 4) continue;
+          let bestAuto = null;
+          [0, 2, 4].forEach(extIn => {
+            const res = evaluateCombo(w, pl, extIn);
+            if (res && (!bestAuto || res.stacks > bestAuto.stacks || (res.stacks === bestAuto.stacks && extIn < bestAuto.ext))) {
+              bestAuto = { ...res, ext: extIn };
+            }
+          });
+          if (bestAuto) {
+            extEl.value = bestAuto.ext;
+            extNote.style.display = bestAuto.ext ? 'block' : 'none';
+            results.textContent = formatResult([
+              `Pallet: ${bestAuto.w}×${bestAuto.pl} ft`,
+              `Stacks: ${bestAuto.stacks}`,
+              `Customer: ${cust}`,
+              `Length/Stack: ${bestAuto.lenPer.toFixed(2)} ft`,
+              `Folds/Stack: ${bestAuto.folds}`,
+              `Stack Width: ${bestAuto.stackW.toFixed(2)} in`,
+              `Total Height: ${formatHeight(bestAuto.totalIn)}`,
+              `Free Pallet Width: ${bestAuto.freeW.toFixed(2)} in`,
+              `Take Downs: ${bestAuto.takedowns.join(', ')} ft`
+            ]);
+            return;
+          }
+        }
+      }
+
+      results.textContent = 'No pallet fits under height restrictions.';
     }
   </script>
 </body>
